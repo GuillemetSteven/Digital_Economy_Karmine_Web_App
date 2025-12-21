@@ -1,0 +1,41 @@
+# Dépendances
+node_modules/
+
+# Build
+dist/
+*.tsbuildinfo
+
+# Environnement
+.env
+.env.local
+.env.production
+.env.*.local
+
+# IDE/Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Claude Code
+.claude/
+
+# Documentation (PDFs stockés ailleurs)
+docs/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporaires
+*.tmp
+nul
+
+# OS
+Thumbs.db
