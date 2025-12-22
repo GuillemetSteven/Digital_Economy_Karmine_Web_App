@@ -10,6 +10,7 @@ export function BibliographyView() {
   const [isFocused, setIsFocused] = useState(false);
   const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set(getSections()));
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [suggestion, setSuggestion] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -58,6 +59,23 @@ export function BibliographyView() {
     }
     return items;
   }, [groupedResults]);
+
+  // Calculate autocomplete suggestion
+  useEffect(() => {
+    if (filter && searchResults.length > 0) {
+      const firstResult = searchResults[0];
+      const title = firstResult.item.title;
+
+      // If the title starts with the filter (case-insensitive), suggest it
+      if (title.toLowerCase().startsWith(filter.toLowerCase())) {
+        setSuggestion(title);
+      } else {
+        setSuggestion('');
+      }
+    } else {
+      setSuggestion('');
+    }
+  }, [filter, searchResults]);
 
   // Reset selected index when filter changes
   useEffect(() => {
@@ -175,13 +193,24 @@ export function BibliographyView() {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Escape' && filter) {
+                  if (e.key === 'Tab' && suggestion && suggestion !== filter) {
+                    e.preventDefault();
+                    setFilter(suggestion);
+                  } else if (e.key === 'Escape' && filter) {
                     e.preventDefault();
                     setFilter('');
                   }
                 }}
-                className="w-full pl-8 pr-24 py-3 bg-transparent text-white placeholder-gray-600 focus:outline-none text-sm"
+                className="w-full pl-8 pr-24 py-3 bg-transparent text-white placeholder-gray-600 focus:outline-none text-sm relative z-10"
               />
+
+              {/* Autocomplete suggestion overlay */}
+              {suggestion && suggestion !== filter && filter && (
+                <div className="absolute left-8 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-gray-600">
+                  <span className="invisible">{filter}</span>
+                  <span>{suggestion.slice(filter.length)}</span>
+                </div>
+              )}
 
               {/* Right side controls */}
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -208,7 +237,7 @@ export function BibliographyView() {
 
             {/* Keyboard hint */}
             <div className="mt-2 text-xs text-gray-600">
-              <span>↑↓ naviguer • Enter ouvrir • Esc effacer</span>
+              <span>Tab compléter • ↑↓ naviguer • Enter ouvrir • Esc effacer</span>
             </div>
           </div>
 
