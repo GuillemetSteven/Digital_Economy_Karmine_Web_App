@@ -184,24 +184,25 @@ export function fuzzyMatch(text: string, pattern: string): FuzzyMatchResult {
 
 /**
  * Highlight matched characters with color based on match type
- * More prominent highlighting than before
+ * For exact matches, no highlighting - the badge indicates the match
  */
 export function highlightMatches(
   text: string,
   indices: number[],
   matchType: MatchType = 'fuzzy'
 ): React.ReactNode {
-  if (indices.length === 0) {
+  // For exact matches, don't highlight - the green badge is enough
+  if (matchType === 'exact' || indices.length === 0) {
     return text;
   }
 
-  // Color based on match type - vibrant colors for visibility
+  // Subtle, minimal highlighting
   const highlightClasses = {
-    'exact': 'bg-green-500 text-white font-bold px-1 rounded',
-    'word-exact': 'bg-blue-500 text-white font-bold px-1 rounded',
-    'starts-with': 'bg-purple-500 text-white font-semibold px-1 rounded',
-    'contains': 'bg-yellow-500 text-gray-900 font-semibold px-1 rounded',
-    'fuzzy': 'bg-blue-400/70 text-blue-100 font-medium px-0.5 rounded',
+    'exact': '', // Never used since we return early
+    'word-exact': 'bg-blue-500/30 text-blue-100 font-medium px-0.5',
+    'starts-with': 'bg-purple-500/30 text-purple-100 font-medium px-0.5',
+    'contains': 'bg-yellow-500/30 text-yellow-100 font-medium px-0.5',
+    'fuzzy': 'bg-gray-500/30 text-gray-100 font-medium px-0.5',
   };
 
   const highlightClass = highlightClasses[matchType];
@@ -225,7 +226,7 @@ export function highlightMatches(
         end++;
       }
 
-      // Add highlighted match with vibrant colors
+      // Add subtle highlighted match
       result.push(
         React.createElement(
           'mark',
@@ -253,59 +254,8 @@ export function highlightMatches(
 }
 
 /**
- * Multi-token search support
- * "league legends" searches for both words
- */
-function searchMultiToken<T>(
-  items: T[],
-  tokens: string[],
-  getSearchableText: (item: T) => string[]
-): Array<{ item: T; score: number; matchIndices: Map<string, number[]>; matchType: MatchType }> {
-  const results: Array<{ item: T; score: number; matchIndices: Map<string, number[]>; matchType: MatchType }> = [];
-
-  for (const item of items) {
-    const texts = getSearchableText(item);
-    let totalScore = 0;
-    const matchIndices = new Map<string, number[]>();
-    let allTokensMatch = true;
-    let bestMatchType: MatchType = 'fuzzy';
-
-    // Each token must match at least one searchable text
-    for (const token of tokens) {
-      let tokenMatched = false;
-
-      for (const text of texts) {
-        const result = fuzzyMatch(text, token);
-        if (result.matches) {
-          tokenMatched = true;
-          totalScore += result.score;
-          matchIndices.set(text, result.indices);
-
-          // Track best match type
-          const typeRank = { 'exact': 5, 'word-exact': 4, 'starts-with': 3, 'contains': 2, 'fuzzy': 1 };
-          if (typeRank[result.matchType] > typeRank[bestMatchType]) {
-            bestMatchType = result.matchType;
-          }
-        }
-      }
-
-      if (!tokenMatched) {
-        allTokensMatch = false;
-        break;
-      }
-    }
-
-    if (allTokensMatch) {
-      results.push({ item, score: totalScore, matchIndices, matchType: bestMatchType });
-    }
-  }
-
-  return results;
-}
-
-/**
  * Search and sort items by fuzzy match score - Arc/Spotlight style
- * Supports multi-token search (space-separated)
+ * Supports phrase search (patterns with spaces treated as exact phrases)
  */
 export function fuzzySearch<T>(
   items: T[],
@@ -321,32 +271,57 @@ export function fuzzySearch<T>(
     }));
   }
 
-  // Split pattern into tokens for multi-word search
-  const tokens = pattern.trim().split(/\s+/).filter(t => t.length > 0);
+  const trimmedPattern = pattern.trim();
 
-  // If multiple tokens, use multi-token search
-  if (tokens.length > 1) {
-    const results = searchMultiToken(items, tokens, getSearchableText);
-    const sorted = results.sort((a, b) => b.score - a.score);
+  // If pattern contains spaces, treat as exact phrase (not multi-token)
+  if (trimmedPattern.includes(' ')) {
+    // Phrase search: only exact or contains matches
+    const results: Array<{ item: T; score: number; matchIndices: Map<string, number[]>; matchType: MatchType }> = [];
 
-    // Apply same smart filtering for multi-token
-    const hasExactMatch = sorted.some(r => r.matchType === 'exact');
-    const hasWordExactMatch = sorted.some(r => r.matchType === 'word-exact');
-    const hasStartsWithMatch = sorted.some(r => r.matchType === 'starts-with');
+    for (const item of items) {
+      const texts = getSearchableText(item);
+      let totalScore = 0;
+      const matchIndices = new Map<string, number[]>();
+      let hasMatch = false;
+      let bestMatchType: MatchType = 'contains';
 
-    if (hasExactMatch) {
-      return sorted.filter(r => r.matchType === 'exact');
-    } else if (hasWordExactMatch) {
-      return sorted.filter(r => r.matchType === 'exact' || r.matchType === 'word-exact');
-    } else if (hasStartsWithMatch) {
-      return sorted.filter(r =>
-        r.matchType === 'exact' ||
-        r.matchType === 'word-exact' ||
-        r.matchType === 'starts-with'
-      );
+      for (const text of texts) {
+        const textLower = text.toLowerCase();
+        const patternLower = trimmedPattern.toLowerCase();
+
+        // Check for exact match
+        if (textLower === patternLower) {
+          hasMatch = true;
+          bestMatchType = 'exact';
+          totalScore += SCORING.EXACT_MATCH;
+          const indices: number[] = [];
+          for (let i = 0; i < trimmedPattern.length; i++) {
+            indices.push(i);
+          }
+          matchIndices.set(text, indices);
+        }
+        // Check for contains match
+        else if (textLower.includes(patternLower)) {
+          hasMatch = true;
+          if (bestMatchType !== 'exact') {
+            bestMatchType = 'contains';
+          }
+          totalScore += SCORING.CONTAINS;
+          const startIdx = textLower.indexOf(patternLower);
+          const indices: number[] = [];
+          for (let i = 0; i < trimmedPattern.length; i++) {
+            indices.push(startIdx + i);
+          }
+          matchIndices.set(text, indices);
+        }
+      }
+
+      if (hasMatch) {
+        results.push({ item, score: totalScore, matchIndices, matchType: bestMatchType });
+      }
     }
 
-    return sorted;
+    return results.sort((a, b) => b.score - a.score);
   }
 
   // Single token search
@@ -360,7 +335,7 @@ export function fuzzySearch<T>(
     let bestMatchType: MatchType = 'fuzzy';
 
     for (const text of texts) {
-      const result = fuzzyMatch(text, pattern);
+      const result = fuzzyMatch(text, trimmedPattern);
       if (result.matches) {
         hasMatch = true;
         totalScore += result.score;

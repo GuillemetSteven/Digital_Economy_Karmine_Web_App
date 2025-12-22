@@ -1,4 +1,4 @@
-import { BookOpen, ExternalLink, Check, X } from 'lucide-react';
+import { BookOpen, ExternalLink, X } from 'lucide-react';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { bibliographieData, BibliographySource, getSections } from '../data/bibliographieData';
 import { fuzzySearch, highlightMatches } from '../utils/fuzzySearch';
@@ -152,24 +152,24 @@ export function BibliographyView() {
         </p>
       </div>
 
-          {/* Fuzzy Search Input - Arc/Spotlight style */}
+          {/* Fuzzy Search Input - Minimal style */}
           <div className="mb-6">
             <div
-              className={`relative bg-karmine-surface rounded-xl border-2 transition-all duration-300 ${
+              className={`relative bg-karmine-surface rounded-lg border transition-all ${
                 isFocused
-                  ? 'border-blue-500 shadow-lg shadow-blue-500/20'
-                  : 'border-blue-900/30 hover:border-blue-900/50'
+                  ? 'border-blue-500'
+                  : 'border-gray-700 hover:border-gray-600'
               }`}
             >
               {/* Terminal-style prompt */}
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center space-x-2 pointer-events-none">
-                <span className="text-blue-500 font-mono font-bold text-lg">&gt;</span>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <span className="text-blue-500 font-mono font-bold">&gt;</span>
               </div>
 
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Rechercher une source, auteur, section... (ex: 'lol' pour League of Legends)"
+                placeholder="Rechercher une source, auteur, section..."
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 onFocus={() => setIsFocused(true)}
@@ -180,19 +180,19 @@ export function BibliographyView() {
                     setFilter('');
                   }
                 }}
-                className="w-full pl-10 pr-28 py-4 bg-transparent text-white placeholder-gray-600 focus:outline-none font-mono text-sm"
+                className="w-full pl-8 pr-24 py-3 bg-transparent text-white placeholder-gray-600 focus:outline-none text-sm"
               />
 
               {/* Right side controls */}
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                {/* Clear button (X) - integrated */}
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                {/* Clear button (X) */}
                 {filter && (
                   <button
                     onClick={() => {
                       setFilter('');
                       inputRef.current?.focus();
                     }}
-                    className="p-1.5 hover:bg-white/10 rounded-full transition-colors text-gray-500 hover:text-white"
+                    className="p-1 hover:bg-white/10 rounded transition-colors text-gray-500 hover:text-white"
                     title="Effacer (Esc)"
                   >
                     <X size={14} />
@@ -200,23 +200,21 @@ export function BibliographyView() {
                 )}
 
                 {/* Results counter */}
-                <div className="px-2 py-0.5 bg-blue-900/20 rounded-full">
-                  <span className="text-xs font-mono text-gray-400 font-medium">
-                    {searchResults.length}/{bibliographieData.length}
-                  </span>
+                <div className="px-2 py-0.5 bg-blue-900/20 rounded text-xs text-gray-400">
+                  {searchResults.length}/{bibliographieData.length}
                 </div>
               </div>
             </div>
 
             {/* Keyboard hint */}
             <div className="mt-2 text-xs text-gray-600">
-              <span>🔍 Recherche intelligente • ↑↓ naviguer • Enter ouvrir • Esc effacer</span>
+              <span>↑↓ naviguer • Enter ouvrir • Esc effacer</span>
             </div>
           </div>
 
-          {/* Section Filters - Horizontal Pills */}
+          {/* Section Filters - Pills (same style as Gallery) */}
           <div className="mb-6">
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex items-center gap-3 overflow-x-auto p-2 scrollbar-hide">
               {/* Bouton "Toutes" */}
               <button
                 onClick={toggleAllSections}
@@ -225,7 +223,7 @@ export function BibliographyView() {
                   transition-all duration-300 ease-out
                   focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
                   ${selectedSections.size === getSections().length
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-xl shadow-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/50 scale-105 font-semibold'
+                    ? 'bg-blue-800/40 text-white scale-105 font-semibold'
                     : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
                   }
                 `}
@@ -234,7 +232,7 @@ export function BibliographyView() {
                 <span className={`
                   text-xs px-2.5 py-0.5 rounded-full font-bold
                   ${selectedSections.size === getSections().length
-                    ? 'bg-white/30 text-white backdrop-blur-sm ring-1 ring-white/20'
+                    ? 'bg-white/30 text-white ring-1 ring-white/20'
                     : 'bg-blue-500/30 text-blue-300'
                   }
                 `}>
@@ -256,7 +254,7 @@ export function BibliographyView() {
                       transition-all duration-300 ease-out
                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
                       ${isActive
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-xl shadow-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/50 scale-105 font-semibold'
+                        ? 'bg-blue-800/40 text-white scale-105 font-semibold'
                         : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
                       }
                     `}
@@ -265,7 +263,7 @@ export function BibliographyView() {
                     <span className={`
                       text-xs px-2.5 py-0.5 rounded-full font-bold
                       ${isActive
-                        ? 'bg-white/30 text-white backdrop-blur-sm ring-1 ring-white/20'
+                        ? 'bg-white/30 text-white ring-1 ring-white/20'
                         : 'bg-blue-500/30 text-blue-300'
                       }
                     `}>
@@ -279,18 +277,18 @@ export function BibliographyView() {
 
           {/* Results - Compact List with Sticky Section Headers */}
           {searchResults.length > 0 ? (
-            <div className="bg-karmine-surface rounded-xl border border-blue-900/30 overflow-hidden">
+            <div className="bg-karmine-surface rounded-lg border border-gray-800 overflow-hidden">
               {(() => {
                 let globalIndex = 0;
                 return Array.from(groupedResults.entries()).map(([section, items]) => (
                   <div key={section}>
                     {/* Section Header - Sticky */}
-                    <div className="sticky top-0 z-10 bg-karmine-surface/95 backdrop-blur-sm px-5 py-3 border-b border-blue-500/30">
+                    <div className="sticky top-0 z-10 bg-karmine-surface px-4 py-2 border-b border-gray-800">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-bold text-blue-400 text-sm uppercase tracking-wider">
+                        <h3 className="font-semibold text-blue-400 text-xs uppercase tracking-wide">
                           {section}
                         </h3>
-                        <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full font-bold">
+                        <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">
                           {items.length}
                         </span>
                       </div>
@@ -309,18 +307,18 @@ export function BibliographyView() {
                             key={source.id}
                             ref={(el) => (itemRefs.current[currentIndex] = el)}
                             className={`
-                              group px-5 py-4 transition-all duration-200 border-l-4
+                              group px-4 py-3 transition-colors border-l-2
                               ${isSelected
-                                ? 'bg-blue-900/40 border-blue-500'
-                                : 'border-transparent hover:bg-blue-900/10 hover:border-blue-500/50'
+                                ? 'bg-blue-900/30 border-blue-500'
+                                : 'border-transparent hover:bg-gray-800/50 hover:border-gray-700'
                               }
                             `}
                           >
-                            <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start justify-between gap-3">
                               <div className="flex-1 min-w-0">
-                                {/* Title with Arc-style highlight */}
-                                <div className="flex items-center gap-2 mb-1.5">
-                                  <h4 className="font-medium text-white group-hover:text-blue-400 transition-colors text-sm leading-relaxed flex-1">
+                                {/* Title */}
+                                <div className="flex items-start gap-2 mb-1">
+                                  <h4 className="text-white text-sm flex-1">
                                     {filter && titleIndices.length > 0
                                       ? highlightMatches(source.title, titleIndices, matchType)
                                       : source.title}
@@ -329,18 +327,18 @@ export function BibliographyView() {
                                   {filter && <MatchTypeBadge type={matchType} compact />}
                                 </div>
                                 {/* Author, year, subsection */}
-                                <div className="flex items-center flex-wrap gap-2">
-                                  <span className="text-xs text-gray-400">
+                                <div className="flex items-center flex-wrap gap-1.5 text-xs text-gray-500">
+                                  <span>
                                     {filter && authorIndices.length > 0
                                       ? highlightMatches(source.author, authorIndices, matchType)
                                       : source.author}
                                   </span>
-                                  <span className="w-1 h-1 rounded-full bg-gray-600"></span>
-                                  <span className="text-xs text-gray-500">{source.year}</span>
+                                  <span>•</span>
+                                  <span>{source.year}</span>
                                   {source.subsection && (
                                     <>
-                                      <span className="w-1 h-1 rounded-full bg-gray-600"></span>
-                                      <span className="text-xs text-blue-500/70">{source.subsection}</span>
+                                      <span>•</span>
+                                      <span className="text-blue-500/70">{source.subsection}</span>
                                     </>
                                   )}
                                 </div>
@@ -348,10 +346,10 @@ export function BibliographyView() {
                               {/* Open button */}
                               <button
                                 onClick={() => openUrl(source.url)}
-                                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500 hover:text-white transition-all duration-200 text-xs font-medium group/btn"
+                                className="flex-shrink-0 flex items-center gap-1 px-2 py-1 bg-blue-500/10 text-blue-400 rounded hover:bg-blue-500 hover:text-white transition-colors text-xs"
                               >
                                 <span>Ouvrir</span>
-                                <ExternalLink size={12} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                                <ExternalLink size={12} />
                               </button>
                             </div>
                           </div>
@@ -363,14 +361,14 @@ export function BibliographyView() {
               })()}
             </div>
           ) : (
-            <div className="text-center py-20 bg-karmine-surface rounded-xl border border-blue-900/30">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-500/10 mb-6">
-                <BookOpen className="text-blue-500" size={40} />
+            <div className="text-center py-16 bg-karmine-surface rounded-lg border border-gray-800">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-blue-500/10 mb-4">
+                <BookOpen className="text-blue-500" size={32} />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className="text-lg font-semibold text-white mb-1">
                 {selectedSections.size === 0 ? 'Aucune catégorie sélectionnée' : 'Aucun résultat'}
               </h3>
-              <p className="text-gray-500 max-w-md mx-auto">
+              <p className="text-gray-500 text-sm max-w-md mx-auto">
                 {selectedSections.size === 0
                   ? 'Sélectionnez au moins une catégorie ci-dessus'
                   : filter
@@ -381,7 +379,7 @@ export function BibliographyView() {
               {filter && (
                 <button
                   onClick={() => setFilter('')}
-                  className="mt-4 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
+                  className="mt-4 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
                 >
                   Effacer la recherche
                 </button>

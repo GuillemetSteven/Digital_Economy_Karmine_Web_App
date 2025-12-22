@@ -69,7 +69,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
         </div>
 
         {/* Section Filters - Pills */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex items-center gap-3 overflow-x-auto p-2 scrollbar-hide">
           {uniqueSections.map((section) => {
             const count = section === 'all' ? allImages.length : sectionCounts[section] || 0;
             const isActive = selectedSection === section;
@@ -83,7 +83,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                   transition-all duration-300 ease-out
                   focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
                   ${isActive
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-xl shadow-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/50 scale-105 font-semibold'
+                    ? 'bg-blue-800/40 text-white scale-105 font-semibold'
                     : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
                   }
                 `}
@@ -94,7 +94,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                 <span className={`
                   text-xs px-2.5 py-0.5 rounded-full font-bold
                   ${isActive
-                    ? 'bg-white/30 text-white backdrop-blur-sm ring-1 ring-white/20'
+                    ? 'bg-white/30 text-white ring-1 ring-white/20'
                     : 'bg-blue-500/30 text-blue-300'
                   }
                 `}>
