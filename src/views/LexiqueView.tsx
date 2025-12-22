@@ -4,10 +4,17 @@ import { lexiqueData, LexiqueEntry } from '../data/lexiqueData';
 import { fuzzySearch, highlightMatches } from '../utils/fuzzySearch';
 import { MatchTypeBadge } from '../components/MatchTypeBadge';
 
+// Helper function to remove parentheses and their content
+const removeParentheses = (text: string): string => {
+  return text.replace(/\s*\([^)]*\)/g, '').trim();
+};
+
 export function LexiqueView() {
   const [filter, setFilter] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [suggestion, setSuggestion] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus input on mount
@@ -15,34 +22,53 @@ export function LexiqueView() {
     inputRef.current?.focus();
   }, []);
 
-  // Fuzzy search - search only in term and category (NOT definition)
+  // Fuzzy search - search in term without parentheses and category (NOT definition)
   const searchResults = useMemo(() => {
     const results = fuzzySearch(lexiqueData, filter, (entry: LexiqueEntry) => [
-      entry.term,
+      removeParentheses(entry.term), // Search in clean term without parentheses
       entry.category || ''
     ]);
 
     return results;
   }, [filter]);
 
-  // Auto-select term when exact match found
+  // Calculate autocomplete suggestion
+  useEffect(() => {
+    if (filter && searchResults.length > 0) {
+      const firstResult = searchResults[0];
+      const cleanTerm = removeParentheses(firstResult.item.term);
+
+      // If the first result starts with the filter (case-insensitive), suggest it
+      if (cleanTerm.toLowerCase().startsWith(filter.toLowerCase())) {
+        setSuggestion(cleanTerm);
+      } else {
+        setSuggestion('');
+      }
+    } else {
+      setSuggestion('');
+    }
+  }, [filter, searchResults]);
+
+  // Auto-select term when exact match found (for inline display only)
   useEffect(() => {
     if (filter && searchResults.length > 0) {
       const exactMatch = searchResults.find(r => r.matchType === 'exact');
       if (exactMatch) {
         setSelectedTerm(exactMatch.item.term);
+        setShowModal(false); // Don't show modal on auto-select
       }
     } else if (!filter) {
       setSelectedTerm(null);
+      setShowModal(false);
     }
   }, [filter, searchResults]);
 
   // Close modal on Escape key and prevent body scroll when modal is open
   useEffect(() => {
-    if (selectedTerm) {
+    if (showModal) {
       const handleEscape = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
-          setSelectedTerm(null);
+          setShowModal(false);
         }
       };
 
@@ -55,7 +81,7 @@ export function LexiqueView() {
         window.removeEventListener('keydown', handleEscape);
       };
     }
-  }, [selectedTerm]);
+  }, [showModal]);
 
   return (
     <div className="px-6 md:px-12 py-12 min-h-screen">
@@ -100,14 +126,26 @@ export function LexiqueView() {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             onKeyDown={(e) => {
-              if (e.key === 'Escape' && filter) {
+              if (e.key === 'Tab' && suggestion && suggestion !== filter) {
+                e.preventDefault();
+                setFilter(suggestion);
+              } else if (e.key === 'Escape' && filter) {
                 e.preventDefault();
                 setFilter('');
                 setSelectedTerm(null);
+                setShowModal(false);
               }
             }}
-            className="w-full pl-10 pr-28 py-4 bg-transparent text-white placeholder-gray-600 focus:outline-none font-mono text-sm"
+            className="w-full pl-10 pr-28 py-4 bg-transparent text-white placeholder-gray-600 focus:outline-none font-mono text-sm relative z-10"
           />
+
+          {/* Autocomplete suggestion overlay */}
+          {suggestion && suggestion !== filter && filter && (
+            <div className="absolute left-10 top-1/2 -translate-y-1/2 pointer-events-none font-mono text-sm text-gray-600">
+              <span className="invisible">{filter}</span>
+              <span>{suggestion.slice(filter.length)}</span>
+            </div>
+          )}
 
           {/* Right side controls */}
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -117,6 +155,7 @@ export function LexiqueView() {
                 onClick={() => {
                   setFilter('');
                   setSelectedTerm(null);
+                  setShowModal(false);
                   inputRef.current?.focus();
                 }}
                 className="p-1.5 hover:bg-white/10 rounded-full transition-colors text-gray-500 hover:text-white"
@@ -137,7 +176,7 @@ export function LexiqueView() {
 
         {/* Keyboard hint */}
         <div className="mt-2 text-xs text-gray-600">
-          <span>🔍 Recherche • Espaces = phrase exacte • Esc effacer</span>
+          <span>🔍 Recherche • Tab compléter • Espaces = phrase exacte • Esc effacer</span>
         </div>
       </div>
 
@@ -148,13 +187,17 @@ export function LexiqueView() {
           <div className="bg-karmine-surface rounded-xl border border-blue-900/30 overflow-hidden">
             <div className="divide-y divide-blue-900/20">
               {searchResults.map(({ item, matchIndices, matchType }) => {
-                const termIndices = matchIndices.get(item.term) || [];
+                const cleanTerm = removeParentheses(item.term);
+                const termIndices = matchIndices.get(cleanTerm) || [];
                 const isSelected = selectedTerm === item.term;
 
                 return (
                   <button
                     key={item.term}
-                    onClick={() => setSelectedTerm(item.term)}
+                    onClick={() => {
+                      setSelectedTerm(item.term);
+                      setShowModal(true);
+                    }}
                     className={`
                       w-full text-left px-5 py-4 transition-all duration-200
                       flex items-center justify-between gap-3 group
@@ -168,8 +211,8 @@ export function LexiqueView() {
                       {/* Term with highlighting */}
                       <h4 className={`font-bold text-base leading-tight ${isSelected ? 'text-blue-300' : 'text-white group-hover:text-blue-200'}`}>
                         {filter && termIndices.length > 0 && matchType !== 'exact'
-                          ? highlightMatches(item.term, termIndices, matchType)
-                          : item.term}
+                          ? highlightMatches(cleanTerm, termIndices, matchType)
+                          : cleanTerm}
                       </h4>
 
                       {/* Category badge (subtle) */}
@@ -217,8 +260,32 @@ export function LexiqueView() {
         )}
       </div>
 
-      {/* Modal - Shows when term is selected */}
-      {selectedTerm && (() => {
+      {/* Inline Definition Display - Shows when term is auto-selected (not clicked) */}
+      {selectedTerm && !showModal && (() => {
+        const entry = lexiqueData.find(e => e.term === selectedTerm);
+        if (!entry) return null;
+
+        return (
+          <div className="mt-6 bg-karmine-surface rounded-xl border-2 border-blue-500/30 p-6 animate-fade-in">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-1">{removeParentheses(entry.term)}</h3>
+                {entry.category && (
+                  <span className="inline-block text-xs text-blue-400 bg-blue-500/20 px-2.5 py-1 rounded-full">
+                    {entry.category}
+                  </span>
+                )}
+              </div>
+            </div>
+            <p className="text-gray-300 leading-relaxed">
+              {entry.definition}
+            </p>
+          </div>
+        );
+      })()}
+
+      {/* Modal - Shows when term is clicked */}
+      {selectedTerm && showModal && (() => {
         const entry = lexiqueData.find(e => e.term === selectedTerm);
         if (!entry) return null;
 
@@ -227,7 +294,7 @@ export function LexiqueView() {
             {/* Backdrop */}
             <div
               className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-fade-in"
-              onClick={() => setSelectedTerm(null)}
+              onClick={() => setShowModal(false)}
             />
 
             {/* Modal */}
@@ -238,7 +305,7 @@ export function LexiqueView() {
               >
                 <div className="flex items-start justify-between gap-4 mb-6">
                   <div>
-                    <h3 className="text-3xl font-bold text-white mb-2">{entry.term}</h3>
+                    <h3 className="text-3xl font-bold text-white mb-2">{removeParentheses(entry.term)}</h3>
                     {entry.category && (
                       <span className="inline-block text-sm text-blue-400 bg-blue-500/20 px-3 py-1 rounded-full">
                         {entry.category}
@@ -246,7 +313,7 @@ export function LexiqueView() {
                     )}
                   </div>
                   <button
-                    onClick={() => setSelectedTerm(null)}
+                    onClick={() => setShowModal(false)}
                     className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white flex-shrink-0"
                     title="Fermer (Esc)"
                   >

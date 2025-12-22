@@ -223,7 +223,7 @@ export function BibliographyView() {
                   transition-all duration-300 ease-out
                   focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
                   ${selectedSections.size === getSections().length
-                    ? 'bg-blue-800/40 text-white scale-105 font-semibold'
+                    ? 'bg-blue-600/50 text-white scale-105 font-semibold border-2 border-blue-400/60'
                     : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
                   }
                 `}
@@ -232,7 +232,7 @@ export function BibliographyView() {
                 <span className={`
                   text-xs px-2.5 py-0.5 rounded-full font-bold
                   ${selectedSections.size === getSections().length
-                    ? 'bg-white/30 text-white ring-1 ring-white/20'
+                    ? 'bg-white/40 text-white ring-2 ring-white/40'
                     : 'bg-blue-500/30 text-blue-300'
                   }
                 `}>
@@ -254,7 +254,7 @@ export function BibliographyView() {
                       transition-all duration-300 ease-out
                       focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
                       ${isActive
-                        ? 'bg-blue-800/40 text-white scale-105 font-semibold'
+                        ? 'bg-blue-600/50 text-white scale-105 font-semibold border-2 border-blue-400/60'
                         : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
                       }
                     `}
@@ -263,7 +263,7 @@ export function BibliographyView() {
                     <span className={`
                       text-xs px-2.5 py-0.5 rounded-full font-bold
                       ${isActive
-                        ? 'bg-white/30 text-white ring-1 ring-white/20'
+                        ? 'bg-white/40 text-white ring-2 ring-white/40'
                         : 'bg-blue-500/30 text-blue-300'
                       }
                     `}>
