@@ -1,4 +1,4 @@
-import { BookOpen, ExternalLink, Download, Check, X } from 'lucide-react';
+import { BookOpen, ExternalLink, Check, X } from 'lucide-react';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { bibliographieData, BibliographySource, getSections } from '../data/bibliographieData';
 import { fuzzySearch, highlightMatches } from '../utils/fuzzySearch';
@@ -131,30 +131,6 @@ export function BibliographyView() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  // Export to CSV
-  const handleExportCSV = () => {
-    const csvContent = [
-      ['ID', 'Auteur', 'Année', 'Titre', 'URL', 'Section', 'Sous-section'],
-      ...bibliographieData.map((item) => [
-        item.id.toString(),
-        item.author,
-        item.year,
-        item.title,
-        item.url,
-        item.section,
-        item.subsection || ''
-      ]),
-    ]
-      .map((row) => row.map((cell) => `"${cell}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'bibliographie_karmine_corp.csv';
-    link.click();
-    URL.revokeObjectURL(link.href);
-  };
 
   return (
     <div className="px-6 md:px-12 py-12 min-h-screen">
@@ -176,83 +152,6 @@ export function BibliographyView() {
         </p>
       </div>
 
-      {/* 2 Columns Layout: Sidebar + Main Content */}
-      <div className="flex gap-8">
-        {/* Sidebar - Categories */}
-        <aside className="w-72 flex-shrink-0">
-          <div className="sticky top-6 space-y-4">
-            {/* Categories Header */}
-            <div className="bg-karmine-surface rounded-xl p-4 border border-blue-900/30">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-white flex items-center gap-2">
-                  <span>Catégories</span>
-                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">
-                    {getSections().length}
-                  </span>
-                </h3>
-                <button
-                  onClick={toggleAllSections}
-                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
-                  title={selectedSections.size === getSections().length ? 'Tout désélectionner' : 'Tout sélectionner'}
-                >
-                  {selectedSections.size === getSections().length ? (
-                    <><X size={14} /> Aucune</>
-                  ) : (
-                    <><Check size={14} /> Toutes</>
-                  )}
-                </button>
-              </div>
-
-              {/* Sections List */}
-              <div className="space-y-2">
-                {getSections().map((section) => {
-                  const isSelected = selectedSections.has(section);
-                  const count = sectionCounts[section] || 0;
-
-                  return (
-                    <button
-                      key={section}
-                      onClick={() => toggleSectionFilter(section)}
-                      className={`
-                        w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-between gap-3
-                        ${isSelected
-                          ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                          : 'bg-blue-900/10 text-gray-400 hover:bg-blue-900/20 hover:text-gray-300'
-                        }
-                      `}
-                    >
-                      <span className="text-sm font-medium truncate">{section}</span>
-                      <span className={`
-                        text-xs px-2 py-0.5 rounded-full font-bold flex-shrink-0
-                        ${isSelected ? 'bg-white/20' : 'bg-blue-500/20 text-blue-400'}
-                      `}>
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Export Card */}
-            <div className="bg-karmine-surface rounded-xl p-4 border border-blue-900/30">
-              <h4 className="font-bold text-white mb-2 text-sm">Exporter</h4>
-              <p className="text-xs text-gray-500 mb-3">
-                Télécharger toutes les sources au format CSV
-              </p>
-              <button
-                onClick={handleExportCSV}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500 hover:text-white transition-all duration-200 text-sm font-medium"
-              >
-                <Download size={16} />
-                <span>Exporter CSV</span>
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 min-w-0">
           {/* Fuzzy Search Input - Arc/Spotlight style */}
           <div className="mb-6">
             <div
@@ -312,6 +211,69 @@ export function BibliographyView() {
             {/* Keyboard hint */}
             <div className="mt-2 text-xs text-gray-600">
               <span>🔍 Recherche intelligente • ↑↓ naviguer • Enter ouvrir • Esc effacer</span>
+            </div>
+          </div>
+
+          {/* Section Filters - Horizontal Pills */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {/* Bouton "Toutes" */}
+              <button
+                onClick={toggleAllSections}
+                className={`
+                  flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap
+                  transition-all duration-300 ease-out
+                  focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
+                  ${selectedSections.size === getSections().length
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-xl shadow-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/50 scale-105 font-semibold'
+                    : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
+                  }
+                `}
+              >
+                <span className="text-sm font-medium">Toutes</span>
+                <span className={`
+                  text-xs px-2.5 py-0.5 rounded-full font-bold
+                  ${selectedSections.size === getSections().length
+                    ? 'bg-white/30 text-white backdrop-blur-sm ring-1 ring-white/20'
+                    : 'bg-blue-500/30 text-blue-300'
+                  }
+                `}>
+                  {bibliographieData.length}
+                </span>
+              </button>
+
+              {/* Badges individuels par section */}
+              {getSections().map((section) => {
+                const count = sectionCounts[section] || 0;
+                const isActive = selectedSections.has(section);
+
+                return (
+                  <button
+                    key={section}
+                    onClick={() => toggleSectionFilter(section)}
+                    className={`
+                      flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap
+                      transition-all duration-300 ease-out
+                      focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
+                      ${isActive
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-xl shadow-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/50 scale-105 font-semibold'
+                        : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
+                      }
+                    `}
+                  >
+                    <span className="text-sm font-medium">{section}</span>
+                    <span className={`
+                      text-xs px-2.5 py-0.5 rounded-full font-bold
+                      ${isActive
+                        ? 'bg-white/30 text-white backdrop-blur-sm ring-1 ring-white/20'
+                        : 'bg-blue-500/30 text-blue-300'
+                      }
+                    `}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -410,7 +372,7 @@ export function BibliographyView() {
               </h3>
               <p className="text-gray-500 max-w-md mx-auto">
                 {selectedSections.size === 0
-                  ? 'Sélectionnez au moins une catégorie dans la sidebar'
+                  ? 'Sélectionnez au moins une catégorie ci-dessus'
                   : filter
                   ? `Aucune source ne correspond à "${filter}"`
                   : 'Aucune source dans les catégories sélectionnées'
@@ -426,8 +388,18 @@ export function BibliographyView() {
               )}
             </div>
           )}
-        </main>
-      </div>
+
+      {/* Inline styles for scrollbar-hide */}
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }

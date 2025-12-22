@@ -266,7 +266,7 @@ export function LexiqueView() {
                             {/* Term with Arc-style highlight and badge */}
                             <div className="flex items-center gap-2">
                               <h4 className="font-bold text-white text-base leading-tight flex-1">
-                                {filter && termIndices.length > 0
+                                {filter && termIndices.length > 0 && matchType !== 'exact'
                                   ? highlightMatches(entry.term, termIndices, matchType)
                                   : entry.term}
                               </h4>
@@ -275,7 +275,7 @@ export function LexiqueView() {
                             </div>
                             {/* Definition with Arc-style highlight */}
                             <p className="text-sm text-gray-400 leading-relaxed">
-                              {filter && defIndices.length > 0
+                              {filter && defIndices.length > 0 && matchType !== 'exact'
                                 ? highlightMatches(entry.definition, defIndices, matchType)
                                 : entry.definition}
                             </p>

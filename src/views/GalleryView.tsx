@@ -79,10 +79,12 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                 key={section}
                 onClick={() => setSelectedSection(section)}
                 className={`
-                  flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all duration-300
+                  flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap
+                  transition-all duration-300 ease-out
+                  focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
                   ${isActive
-                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
-                    : 'bg-blue-900/20 text-gray-300 hover:bg-blue-900/30 hover:text-white'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-xl shadow-blue-500/40 hover:shadow-2xl hover:shadow-blue-500/50 scale-105 font-semibold'
+                    : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
                   }
                 `}
               >
@@ -90,8 +92,11 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                   {section === 'all' ? 'Toutes' : section}
                 </span>
                 <span className={`
-                  text-xs px-2 py-0.5 rounded-full font-bold
-                  ${isActive ? 'bg-white/20' : 'bg-blue-500/20 text-blue-400'}
+                  text-xs px-2.5 py-0.5 rounded-full font-bold
+                  ${isActive
+                    ? 'bg-white/30 text-white backdrop-blur-sm ring-1 ring-white/20'
+                    : 'bg-blue-500/30 text-blue-300'
+                  }
                 `}>
                   {count}
                 </span>
