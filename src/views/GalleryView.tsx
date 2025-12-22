@@ -127,7 +127,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                 <div className="absolute inset-0">
                   {img.src ? (
                     <img
-                      src={img.src}
+                      src={img.mediaType === 'video' && img.videoThumbnail ? img.videoThumbnail : img.src}
                       alt={img.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                       loading="lazy"
@@ -149,13 +149,9 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
 
                 {/* Content Overlay - Bottom with Glassmorphism */}
                 <div className="absolute bottom-0 left-0 right-0 p-5 backdrop-blur-md bg-white/5 border-t border-white/10">
-                  <h4 className="text-white text-base font-bold mb-1.5 line-clamp-2 group-hover:text-blue-300 transition-colors">
+                  <h4 className="text-white text-base font-bold line-clamp-2 group-hover:text-blue-300 transition-colors">
                     {img.title}
                   </h4>
-                  <p className="text-gray-400 text-xs truncate flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    {img.source}
-                  </p>
                 </div>
               </div>
             );
