@@ -77,7 +77,7 @@ export const lexiqueData: LexiqueEntry[] = [
   },
   {
     term: "LEC (League of Legends European Championship)",
-    definition: "Ligue élite européenne de League of Legends, composée de 10 équipes en système de franchise. KC a acquis son slot en octobre 2023 pour ~€17M et est devenu champion LEC Winter 2025, marquant une ascension fulgurante depuis la Division 2 française.",
+    definition: "Ligue élite européenne de League of Legends, composée de 10 équipes en système de franchise. KC a acquis son slot en octobre 2023 pour ~€20M et est devenu champion LEC Winter 2025, marquant une ascension fulgurante depuis la Division 2 française.",
     category: "Compétition"
   },
   {
@@ -92,7 +92,7 @@ export const lexiqueData: LexiqueEntry[] = [
   },
   {
     term: "Slot (franchise)",
-    definition: "Place permanente dans une ligue fermée (franchise model). KC a acquis le slot LEC d'Astralis en octobre 2023 pour environ €17M, garantissant sa participation à la LEC sans risque de relégation, contrairement aux ligues ouvertes à promotion/relégation.",
+    definition: "Place permanente dans une ligue fermée (franchise model). KC a acquis le slot LEC d'Astralis en octobre 2023 pour environ €20M, garantissant sa participation à la LEC sans risque de relégation, contrairement aux ligues ouvertes à promotion/relégation.",
     category: "Business"
   },
   {
