@@ -109,17 +109,17 @@ export function LexiqueView() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center space-x-4 mb-4">
-          <div className="p-3 bg-blue-500/10 rounded-xl">
-            <BookText className="text-blue-500" size={28} />
+          <div className="p-3 bg-blue-500/5 rounded-lg border border-blue-500/20">
+            <BookText className="text-blue-400" size={28} />
           </div>
           <div>
-            <h2 className="text-3xl font-bold text-white">Lexique</h2>
-            <p className="text-gray-500 text-sm">
+            <h2 className="text-3xl font-bold text-white tracking-tight">Lexique</h2>
+            <p className="text-gray-500 text-xs font-mono uppercase tracking-wider">
               {searchResults.length} / {lexiqueData.length} termes
             </p>
           </div>
         </div>
-        <p className="text-gray-400">
+        <p className="text-gray-400 text-sm leading-relaxed">
           Glossaire des termes techniques et définitions utilisés dans ce rapport.
         </p>
       </div>
@@ -141,6 +141,7 @@ export function LexiqueView() {
           inputRef={inputRef}
           resultCount={searchResults.length}
           totalCount={lexiqueData.length}
+          showChevron={searchResults.length > 0}
           onKeyDown={(e) => {
             if (e.key === 'Tab' && suggestion && suggestion !== filter) {
               e.preventDefault();
@@ -153,19 +154,15 @@ export function LexiqueView() {
               }
             } else if (e.key === 'Escape') {
               e.preventDefault();
-              if (showModal) {
-                // First ESC: Close modal only
-                setShowModal(false);
-              } else if (filter) {
-                // Second ESC: Clear search and reset
-                setFilter('');
-                setSelectedTerm(null);
-              }
+              // Single ESC: Clear everything at once
+              setFilter('');
+              setSelectedTerm(null);
+              setShowModal(false);
             }
           }}
           autocompleteOverlay={
             suggestion && suggestion !== filter && filter ? (
-              <div className="absolute left-10 top-1/2 -translate-y-1/2 pointer-events-none font-mono text-sm text-blue-200 z-20">
+              <div className="absolute left-14 top-4 pointer-events-none font-mono text-sm text-gray-500 z-20">
                 <span className="invisible">{filter.trimStart()}</span>
                 <span>{suggestion.slice(filter.trimStart().length)}</span>
               </div>
@@ -178,7 +175,7 @@ export function LexiqueView() {
       <div className="space-y-4">
         {/* Terms List */}
         {searchResults.length > 0 ? (
-          <div className="bg-karmine-surface rounded-xl border border-blue-900/30 overflow-hidden">
+          <div className="bg-karmine-surface/90 backdrop-blur-sm rounded-lg border border-blue-200/20 overflow-hidden shadow-lg shadow-blue-500/5">
             <div className="divide-y divide-blue-900/20">
               {searchResults.map(({ item, matchIndices, matchType }) => {
                 const cleanTerm = removeParentheses(item.term);
@@ -196,8 +193,8 @@ export function LexiqueView() {
                       w-full text-left px-5 py-4 transition-all duration-200
                       flex items-center justify-between gap-3 group
                       ${isSelected
-                        ? 'bg-blue-500/20 border-l-4 border-blue-500'
-                        : 'hover:bg-blue-900/10 border-l-4 border-transparent hover:border-blue-500/30'
+                        ? 'bg-gradient-to-r from-blue-500/[0.08] via-blue-500/[0.05] to-transparent shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]'
+                        : 'hover:bg-blue-900/10 hover:shadow-[inset_0_0_8px_rgba(59,130,246,0.08)]'
                       }
                     `}
                   >
@@ -211,7 +208,7 @@ export function LexiqueView() {
 
                       {/* Category badge (subtle) */}
                       {item.category && (
-                        <span className="text-xs text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded">
+                        <span className="text-xs text-blue-400/80 bg-blue-500/10 px-2.5 py-0.5 rounded-sm border border-blue-500/20 font-mono uppercase tracking-wide">
                           {item.category}
                         </span>
                       )}
@@ -225,14 +222,14 @@ export function LexiqueView() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-20 bg-karmine-surface rounded-xl border border-blue-900/30">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-500/10 mb-6">
-              <BookText className="text-blue-500" size={40} />
+          <div className="text-center py-20 bg-karmine-surface/50 backdrop-blur-sm rounded-lg border border-blue-200/20">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-lg bg-blue-500/5 border border-blue-500/20 mb-6">
+              <BookText className="text-blue-400" size={40} />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold text-white mb-2 tracking-tight">
               Aucun résultat
             </h3>
-            <p className="text-gray-500 max-w-md mx-auto">
+            <p className="text-gray-400 max-w-md mx-auto text-sm leading-relaxed">
               {filter
                 ? `Aucun terme ne correspond à "${filter}"`
                 : 'Aucun terme disponible'}
@@ -240,9 +237,9 @@ export function LexiqueView() {
             {filter && (
               <button
                 onClick={() => setFilter('')}
-                className="mt-4 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
+                className="mt-6 px-5 py-2.5 bg-blue-500/10 text-blue-400 rounded-md hover:bg-blue-500/20 transition-all duration-200 text-sm font-mono uppercase tracking-wide border border-blue-500/30"
               >
-                Effacer la recherche
+                Effacer
               </button>
             )}
           </div>
@@ -255,18 +252,18 @@ export function LexiqueView() {
         if (!entry) return null;
 
         return (
-          <div className="mt-6 bg-karmine-surface rounded-xl border-2 border-blue-500/30 p-6 animate-fade-in">
-            <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="mt-6 bg-karmine-surface/90 backdrop-blur-sm rounded-lg border border-blue-500/30 p-6 animate-fade-in shadow-lg shadow-blue-500/10">
+            <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <h3 className="text-2xl font-bold text-white mb-1">{removeParentheses(entry.term)}</h3>
+                <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">{removeParentheses(entry.term)}</h3>
                 {entry.category && (
-                  <span className="inline-block text-xs text-blue-400 bg-blue-500/20 px-2.5 py-1 rounded-full">
+                  <span className="inline-block text-xs text-blue-400 bg-blue-500/15 px-3 py-1 rounded-md border border-blue-500/30 font-mono uppercase tracking-wide">
                     {entry.category}
                   </span>
                 )}
               </div>
             </div>
-            <p className="text-gray-300 leading-relaxed">
+            <p className="text-gray-300 leading-relaxed text-base">
               {entry.definition}
             </p>
           </div>
@@ -296,7 +293,7 @@ export function LexiqueView() {
                   <div>
                     <h3 className="text-3xl font-bold text-white mb-2">{removeParentheses(entry.term)}</h3>
                     {entry.category && (
-                      <span className="inline-block text-sm text-blue-400 bg-blue-500/20 px-3 py-1 rounded-full">
+                      <span className="inline-block text-xs text-blue-400 bg-blue-500/15 px-3 py-1 rounded-md border border-blue-500/30 font-mono uppercase tracking-wide">
                         {entry.category}
                       </span>
                     )}

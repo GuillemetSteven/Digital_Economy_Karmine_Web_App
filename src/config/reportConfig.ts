@@ -19,6 +19,7 @@ export const reportConfig: ReportConfig = {
           src: `${import.meta.env.BASE_URL}imgs/poesie_video_kamel.mp4`,
           mediaType: 'video' as const,
           videoThumbnail: `${import.meta.env.BASE_URL}imgs/kameto.jpg`,
+          searchKeywords: ["presentation", "kamel", "kameto", "video", "intro"],
         },
       ]
     },
@@ -32,6 +33,7 @@ export const reportConfig: ReportConfig = {
           source: "Analyse personnelle",
           src: `${import.meta.env.BASE_URL}imgs/PESTEL_kc.JPG`,
           pageNumber: 14,
+          searchKeywords: ["pestel", "pest", "macro", "environnement", "politique", "economique", "social", "technologique", "ecologique", "legal"],
         },
         {
           id: 203,
@@ -39,6 +41,7 @@ export const reportConfig: ReportConfig = {
           source: "Cours Stratégie",
           src: `${import.meta.env.BASE_URL}imgs/5_PORTER.JPG`,
           pageNumber: 15,
+          searchKeywords: ["porter", "porteur", "5 forces", "forces", "concurrence", "fournisseurs", "clients", "entrants", "substituts"],
         },
       ]
     },
@@ -52,6 +55,7 @@ export const reportConfig: ReportConfig = {
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/swot_kc.JPG`,
           pageNumber: 16,
+          searchKeywords: ["swot", "forces", "faiblesses", "opportunites", "menaces", "strengths", "weaknesses", "opportunities", "threats"],
         },
         {
           id: 302,
@@ -59,6 +63,7 @@ export const reportConfig: ReportConfig = {
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/swot_consolide_kc.JPG`,
           pageNumber: 17,
+          searchKeywords: ["swot", "consolide", "consolidé", "cons", "synthese", "global"],
         },
         {
           id: 303,
@@ -66,6 +71,7 @@ export const reportConfig: ReportConfig = {
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/VRIO_kc.JPG`,
           pageNumber: 18,
+          searchKeywords: ["vrio", "ressources", "capacites", "value", "rarity", "imitability", "organization", "valeur", "rarete", "inimitabilite"],
         },
       ]
     },
@@ -79,6 +85,7 @@ export const reportConfig: ReportConfig = {
           source: "Sites officiels G2/Vitality",
           src: `${import.meta.env.BASE_URL}imgs/benchmark_kc.JPG`,
           pageNumber: 19,
+          searchKeywords: ["benchmark", "concurrent", "concurrents", "comparaison", "g2", "vitality", "competition"],
         },
         {
           id: 402,
@@ -86,6 +93,7 @@ export const reportConfig: ReportConfig = {
           source: "Blue Ocean Strategy",
           src: `${import.meta.env.BASE_URL}imgs/STRATEGIC_CANVAS_kc.png`,
           pageNumber: 21,
+          searchKeywords: ["strategic", "canvas", "strategie", "ocean bleu", "blue ocean", "canevas", "differentiation"],
         },
         {
           id: 403,
@@ -93,6 +101,7 @@ export const reportConfig: ReportConfig = {
           source: "Etude qualitative",
           src: `${import.meta.env.BASE_URL}imgs/Value_Proposition_Canvas_kc.png`,
           pageNumber: 23,
+          searchKeywords: ["value", "proposition", "valeur", "canvas", "canevas", "client", "benefices", "gains", "pains"],
         },
       ]
     },
@@ -106,6 +115,7 @@ export const reportConfig: ReportConfig = {
           source: "Strategyzer",
           src: `${import.meta.env.BASE_URL}imgs/business_model_canvas_kc.JPG`,
           pageNumber: 26,
+          searchKeywords: ["business", "model", "canvas", "bmc", "canevas", "osterwalder", "strategyzer", "proposition"],
         },
         {
           id: 502,
@@ -113,6 +123,7 @@ export const reportConfig: ReportConfig = {
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/tows.png`,
           pageNumber: 29,
+          searchKeywords: ["tows", "taus", "strategie", "swot", "menaces", "opportunites", "forces", "faiblesses"],
         },
       ]
     }

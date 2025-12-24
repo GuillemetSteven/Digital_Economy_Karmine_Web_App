@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Search, Images, Expand } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { Images, Expand } from 'lucide-react';
 import { ReportSection, ReportImage } from '../types';
 import { PlaceholderImage } from '../components/PlaceholderImage';
+import { SearchInput } from '../components/SearchInput';
+import { fuzzySearch } from '../utils/fuzzySearch';
 
 interface GalleryViewProps {
   sections: ReportSection[];
@@ -17,6 +19,9 @@ const getBentoSize = (index: number): string => {
 export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
   const [filter, setFilter] = useState('');
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [isFocused, setIsFocused] = useState(false);
+  const [suggestion, setSuggestion] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Get unique sections for filters
   const uniqueSections = ['all', ...sections.map(s => s.title)];
@@ -26,18 +31,83 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
     s.images.map((img) => ({ ...img, sectionTitle: s.title }))
   );
 
-  // Filter images by search and section
-  const filteredImages = allImages.filter((img) => {
-    const matchesSearch = img.title.toLowerCase().includes(filter.toLowerCase());
-    const matchesSection = selectedSection === 'all' || img.sectionTitle === selectedSection;
-    return matchesSearch && matchesSection;
-  });
+  // Fuzzy search on images - search in title, sectionTitle, and searchKeywords
+  const searchResults = useMemo(() => {
+    return fuzzySearch(allImages, filter, (img: ReportImage & { sectionTitle: string }) => [
+      img.title,
+      img.sectionTitle,
+      ...(img.searchKeywords || [])
+    ]);
+  }, [allImages, filter]);
+
+  // Apply section filter
+  const filteredImages = useMemo(() => {
+    return searchResults
+      .map(result => result.item)
+      .filter(img => selectedSection === 'all' || img.sectionTitle === selectedSection);
+  }, [searchResults, selectedSection]);
+
+  // Calculate autocomplete suggestion
+  useEffect(() => {
+    const filterNoLeading = filter.trimStart();
+
+    if (!filterNoLeading || filter.trimEnd() !== filter || searchResults.length === 0) {
+      setSuggestion('');
+      return;
+    }
+
+    const firstResult = searchResults[0];
+    const firstImageTitle = firstResult.item.title;
+    const isPhraseSearch = filterNoLeading.includes(' ');
+
+    if (isPhraseSearch) {
+      // For phrase searches, only suggest if high-quality match
+      if (
+        (firstResult.matchType === 'exact' ||
+         firstResult.matchType === 'contains' ||
+         firstResult.matchType === 'starts-with') &&
+        firstImageTitle.toLowerCase().startsWith(filterNoLeading.toLowerCase())
+      ) {
+        setSuggestion(firstImageTitle);
+      } else {
+        setSuggestion('');
+      }
+    } else {
+      // Single word: suggest if title starts with the search
+      if (firstImageTitle.toLowerCase().startsWith(filterNoLeading.toLowerCase())) {
+        setSuggestion(firstImageTitle);
+      } else {
+        setSuggestion('');
+      }
+    }
+  }, [filter, searchResults]);
+
+  // Focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   // Count images per section for badges
   const sectionCounts = sections.reduce((acc, section) => {
     acc[section.title] = section.images.length;
     return acc;
   }, {} as Record<string, number>);
+
+  // Keyboard event handler
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Tab' && suggestion && suggestion !== filter) {
+      e.preventDefault();
+      setFilter(suggestion);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filteredImages.length > 0) {
+        onImageClick(filteredImages[0], allImages);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setFilter('');
+    }
+  };
 
   return (
     <div className="px-6 md:px-12 py-12 min-h-screen">
@@ -53,18 +123,35 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative max-w-md mb-6">
-          <Search
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Rechercher une oeuvre..."
+        {/* Search Input with Fuzzy Search */}
+        <div className="max-w-md mb-6">
+          <SearchInput
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="w-full bg-karmine-surface border border-blue-900/30 rounded-xl py-3 pl-12 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all"
+            onChange={setFilter}
+            onClear={() => {
+              setFilter('');
+              inputRef.current?.focus();
+            }}
+            placeholder="Rechercher une oeuvre..."
+            isFocused={isFocused}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            inputRef={inputRef}
+            resultCount={filteredImages.length}
+            totalCount={allImages.length}
+            showCounter={true}
+            showPrompt={true}
+            showClearButton={true}
+            showChevron={filteredImages.length > 0}
+            onKeyDown={handleKeyDown}
+            autocompleteOverlay={
+              suggestion && suggestion !== filter && filter ? (
+                <div className="absolute left-14 top-4 pointer-events-none font-mono text-sm text-gray-500 z-20">
+                  <span className="invisible">{filter.trimStart()}</span>
+                  <span>{suggestion.slice(filter.trimStart().length)}</span>
+                </div>
+              ) : null
+            }
           />
         </div>
 
@@ -79,23 +166,23 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                 key={section}
                 onClick={() => setSelectedSection(section)}
                 className={`
-                  flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap
-                  transition-all duration-300 ease-out
-                  focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
+                  flex items-center gap-2.5 px-5 py-2.5 rounded-md whitespace-nowrap
+                  transition-all duration-200 font-mono text-xs uppercase tracking-wider
+                  outline-none
                   ${isActive
-                    ? 'bg-blue-600/50 text-white scale-105 font-semibold border-2 border-blue-400/60'
-                    : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
+                    ? 'bg-blue-500/20 text-blue-200 border-2 border-blue-400/60 shadow-[0_0_8px_rgba(59,130,246,0.08)]'
+                    : 'bg-blue-900/20 border border-blue-800/40 text-gray-400 hover:bg-blue-800/30 hover:border-blue-700/60 hover:text-blue-200'
                   }
                 `}
               >
-                <span className="text-sm font-medium">
+                <span className="font-bold">
                   {section === 'all' ? 'Toutes' : section}
                 </span>
                 <span className={`
-                  text-xs px-2.5 py-0.5 rounded-full font-bold
+                  text-xs px-2 py-0.5 rounded-sm font-bold
                   ${isActive
-                    ? 'bg-white/40 text-white ring-2 ring-white/40'
-                    : 'bg-blue-500/30 text-blue-300'
+                    ? 'bg-blue-300/30 text-blue-100'
+                    : 'bg-blue-500/20 text-blue-400'
                   }
                 `}>
                   {count}
@@ -126,7 +213,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                 style={{
                   animationDelay: `${index * 50}ms`,
                 }}
-                onClick={() => onImageClick(img, filteredImages)}
+                onClick={() => onImageClick(img, allImages)}
               >
                 {/* Image Container */}
                 <div className="absolute inset-0">

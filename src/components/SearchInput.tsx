@@ -1,5 +1,5 @@
 import { RefObject, useState, useEffect } from 'react';
-import { X, CornerDownLeft, Terminal } from 'lucide-react';
+import { X, CornerDownLeft, Terminal, ChevronRight } from 'lucide-react';
 
 interface SearchInputProps {
   value: string;
@@ -15,6 +15,7 @@ interface SearchInputProps {
   showCounter?: boolean;
   showPrompt?: boolean;
   showClearButton?: boolean;
+  showChevron?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   autocompleteOverlay?: React.ReactNode;
 }
@@ -33,6 +34,7 @@ export function SearchInput({
   showCounter = true,
   showPrompt = true,
   showClearButton = true,
+  showChevron = false,
   onKeyDown,
   autocompleteOverlay,
 }: SearchInputProps) {
@@ -99,18 +101,24 @@ export function SearchInput({
             border-t border-l border-r
             ${isFocused ? 'border-blue-200/70' : 'border-blue-200/30'}
             rounded-t-sm
-            text-white placeholder:text-blue-200/40
-            focus:outline-none
+            text-blue-200 placeholder:text-blue-200/40
+            outline-none
             transition-colors duration-300
             font-mono text-sm
-            ${showPrompt ? 'pl-10' : ''}
+            ${showPrompt ? (showChevron ? 'pl-14' : 'pl-10') : ''}
             relative z-10
           `}
         />
 
-        {/* Terminal-style prompt */}
+        {/* Terminal-style prompt with optional chevron */}
         {showPrompt && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-1.5">
+            {showChevron && (
+              <ChevronRight
+                size={16}
+                className="text-blue-200/70 transition-colors"
+              />
+            )}
             <span className="text-blue-200 font-mono font-bold text-lg">&gt;</span>
           </div>
         )}

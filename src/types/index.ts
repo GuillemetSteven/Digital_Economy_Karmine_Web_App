@@ -10,6 +10,7 @@ export interface ReportImage {
   mediaType?: MediaType;
   videoThumbnail?: string;
   pageNumber?: number;
+  searchKeywords?: string[]; // Mots-clés pour faciliter la recherche
 }
 
 // Type pour une section

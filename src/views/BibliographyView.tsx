@@ -1,9 +1,10 @@
-import { BookOpen, ExternalLink, X } from 'lucide-react';
+import { BookOpen, ExternalLink } from 'lucide-react';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { bibliographieData, BibliographySource, getSections } from '../data/bibliographieData';
 import { fuzzySearch, highlightMatches } from '../utils/fuzzySearch';
 import { MatchType } from '../types/search';
 import { MatchTypeBadge } from '../components/MatchTypeBadge';
+import { SearchInput } from '../components/SearchInput';
 
 export function BibliographyView() {
   const [filter, setFilter] = useState('');
@@ -191,75 +192,41 @@ export function BibliographyView() {
         </p>
       </div>
 
-          {/* Fuzzy Search Input - Minimal style */}
+          {/* Fuzzy Search Input */}
           <div className="mb-6">
-            <div
-              className={`relative bg-karmine-surface rounded-lg border transition-all ${
-                isFocused
-                  ? 'border-blue-500'
-                  : 'border-gray-700 hover:border-gray-600'
-              }`}
-            >
-              {/* Terminal-style prompt */}
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <span className="text-blue-500 font-mono font-bold">&gt;</span>
-              </div>
-
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Rechercher une source, auteur, section..."
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Tab' && suggestion && suggestion !== filter) {
-                    e.preventDefault();
-                    setFilter(suggestion);
-                  } else if (e.key === 'Escape' && filter) {
-                    e.preventDefault();
-                    setFilter('');
-                  }
-                }}
-                className="w-full pl-8 pr-24 py-3 bg-transparent text-white placeholder-gray-600 focus:outline-none text-sm relative z-10"
-              />
-
-              {/* Autocomplete suggestion overlay */}
-              {suggestion && suggestion !== filter && filter && (
-                <div className="absolute left-8 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-blue-200 z-20">
-                  <span className="invisible">{filter.trimStart()}</span>
-                  <span>{suggestion.slice(filter.trimStart().length)}</span>
-                </div>
-              )}
-
-              {/* Right side controls */}
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                {/* Clear button (X) */}
-                {filter && (
-                  <button
-                    onClick={() => {
-                      setFilter('');
-                      inputRef.current?.focus();
-                    }}
-                    className="p-1 hover:bg-white/10 rounded transition-colors text-gray-500 hover:text-white"
-                    title="Effacer (Esc)"
-                  >
-                    <X size={14} />
-                  </button>
-                )}
-
-                {/* Results counter */}
-                <div className="px-2 py-0.5 bg-blue-900/20 rounded text-xs text-gray-400">
-                  {searchResults.length}/{bibliographieData.length}
-                </div>
-              </div>
-            </div>
-
-            {/* Keyboard hint */}
-            <div className="mt-2 text-xs text-gray-600">
-              <span>Tab compléter • ↑↓ naviguer • Enter ouvrir • Esc effacer</span>
-            </div>
+            <SearchInput
+              value={filter}
+              onChange={setFilter}
+              onClear={() => {
+                setFilter('');
+                inputRef.current?.focus();
+              }}
+              placeholder="Rechercher une source, auteur, section..."
+              isFocused={isFocused}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              inputRef={inputRef}
+              resultCount={searchResults.length}
+              totalCount={bibliographieData.length}
+              showChevron={searchResults.length > 0}
+              onKeyDown={(e) => {
+                if (e.key === 'Tab' && suggestion && suggestion !== filter) {
+                  e.preventDefault();
+                  setFilter(suggestion);
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  setFilter('');
+                }
+              }}
+              autocompleteOverlay={
+                suggestion && suggestion !== filter && filter ? (
+                  <div className="absolute left-14 top-4 pointer-events-none font-mono text-sm text-gray-500 z-20">
+                    <span className="invisible">{filter.trimStart()}</span>
+                    <span>{suggestion.slice(filter.trimStart().length)}</span>
+                  </div>
+                ) : null
+              }
+            />
           </div>
 
           {/* Section Filters - Pills (same style as Gallery) */}
@@ -269,21 +236,21 @@ export function BibliographyView() {
               <button
                 onClick={toggleAllSections}
                 className={`
-                  flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap
-                  transition-all duration-300 ease-out
-                  focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
+                  flex items-center gap-2.5 px-5 py-2.5 rounded-md whitespace-nowrap
+                  transition-all duration-200 font-mono text-xs uppercase tracking-wider
+                  outline-none
                   ${selectedSections.size === getSections().length
-                    ? 'bg-blue-600/50 text-white scale-105 font-semibold border-2 border-blue-400/60'
-                    : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
+                    ? 'bg-blue-500/20 text-blue-200 border-2 border-blue-400/60 shadow-[0_0_8px_rgba(59,130,246,0.08)]'
+                    : 'bg-blue-900/20 border border-blue-800/40 text-gray-400 hover:bg-blue-800/30 hover:border-blue-700/60 hover:text-blue-200'
                   }
                 `}
               >
-                <span className="text-sm font-medium">Toutes</span>
+                <span className="font-bold">Toutes</span>
                 <span className={`
-                  text-xs px-2.5 py-0.5 rounded-full font-bold
+                  text-xs px-2 py-0.5 rounded-sm font-bold
                   ${selectedSections.size === getSections().length
-                    ? 'bg-white/40 text-white ring-2 ring-white/40'
-                    : 'bg-blue-500/30 text-blue-300'
+                    ? 'bg-blue-300/30 text-blue-100'
+                    : 'bg-blue-500/20 text-blue-400'
                   }
                 `}>
                   {bibliographieData.length}
@@ -300,21 +267,21 @@ export function BibliographyView() {
                     key={section}
                     onClick={() => toggleSectionFilter(section)}
                     className={`
-                      flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap
-                      transition-all duration-300 ease-out
-                      focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-karmine-dark
+                      flex items-center gap-2.5 px-5 py-2.5 rounded-md whitespace-nowrap
+                      transition-all duration-200 font-mono text-xs uppercase tracking-wider
+                      outline-none
                       ${isActive
-                        ? 'bg-blue-600/50 text-white scale-105 font-semibold border-2 border-blue-400/60'
-                        : 'bg-blue-900/30 border border-blue-800/40 text-gray-400 hover:bg-blue-800/40 hover:border-blue-700/60 hover:text-blue-200 hover:scale-102'
+                        ? 'bg-blue-500/20 text-blue-200 border-2 border-blue-400/60 shadow-[0_0_8px_rgba(59,130,246,0.08)]'
+                        : 'bg-blue-900/20 border border-blue-800/40 text-gray-400 hover:bg-blue-800/30 hover:border-blue-700/60 hover:text-blue-200'
                       }
                     `}
                   >
-                    <span className="text-sm font-medium">{section}</span>
+                    <span className="font-bold">{section}</span>
                     <span className={`
-                      text-xs px-2.5 py-0.5 rounded-full font-bold
+                      text-xs px-2 py-0.5 rounded-sm font-bold
                       ${isActive
-                        ? 'bg-white/40 text-white ring-2 ring-white/40'
-                        : 'bg-blue-500/30 text-blue-300'
+                        ? 'bg-blue-300/30 text-blue-100'
+                        : 'bg-blue-500/20 text-blue-400'
                       }
                     `}>
                       {count}
@@ -359,7 +326,7 @@ export function BibliographyView() {
                             className={`
                               group px-4 py-3 transition-colors border-l-2
                               ${isSelected
-                                ? 'bg-blue-900/30 border-blue-500'
+                                ? 'bg-blue-900/30 border-blue-400'
                                 : 'border-transparent hover:bg-gray-800/50 hover:border-gray-700'
                               }
                             `}
