@@ -1,8 +1,8 @@
-import { BookText, X } from 'lucide-react';
+import { BookText, X, ChevronRight } from 'lucide-react';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { lexiqueData, LexiqueEntry } from '../data/lexiqueData';
 import { fuzzySearch, highlightMatches } from '../utils/fuzzySearch';
-import { MatchTypeBadge } from '../components/MatchTypeBadge';
+import { SearchInput } from '../components/SearchInput';
 
 // Helper function to remove parentheses and their content
 const removeParentheses = (text: string): string => {
@@ -34,18 +34,39 @@ export function LexiqueView() {
 
   // Calculate autocomplete suggestion
   useEffect(() => {
-    if (filter && searchResults.length > 0) {
-      const firstResult = searchResults[0];
-      const cleanTerm = removeParentheses(firstResult.item.term);
+    const filterNoLeading = filter.trimStart();
 
-      // If the first result starts with the filter (case-insensitive), suggest it
-      if (cleanTerm.toLowerCase().startsWith(filter.toLowerCase())) {
+    // Don't suggest if filter is empty, only spaces, or has trailing spaces
+    if (!filterNoLeading || filter.trimEnd() !== filter || searchResults.length === 0) {
+      setSuggestion('');
+      return;
+    }
+
+    const firstResult = searchResults[0];
+    const cleanTerm = removeParentheses(firstResult.item.term);
+
+    // Check if filter contains spaces (phrase search mode)
+    const isPhraseSearch = filterNoLeading.includes(' ');
+
+    if (isPhraseSearch) {
+      // For phrase searches, only suggest if high-quality match
+      if (
+        (firstResult.matchType === 'exact' ||
+         firstResult.matchType === 'contains' ||
+         firstResult.matchType === 'starts-with') &&
+        cleanTerm.toLowerCase().startsWith(filterNoLeading.toLowerCase())
+      ) {
         setSuggestion(cleanTerm);
       } else {
         setSuggestion('');
       }
     } else {
-      setSuggestion('');
+      // Single word: match without leading spaces
+      if (cleanTerm.toLowerCase().startsWith(filterNoLeading.toLowerCase())) {
+        setSuggestion(cleanTerm);
+      } else {
+        setSuggestion('');
+      }
     }
   }, [filter, searchResults]);
 
@@ -105,79 +126,52 @@ export function LexiqueView() {
 
       {/* Fuzzy Search Input */}
       <div className="mb-6">
-        <div
-          className={`relative bg-karmine-surface rounded-xl border-2 transition-all duration-300 ${
-            isFocused
-              ? 'border-blue-500 shadow-lg shadow-blue-500/20'
-              : 'border-blue-900/30 hover:border-blue-900/50'
-          }`}
-        >
-          {/* Terminal-style prompt */}
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center space-x-2 pointer-events-none">
-            <span className="text-blue-500 font-mono font-bold text-lg">&gt;</span>
-          </div>
-
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Rechercher un terme... (espaces = phrase exacte)"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onKeyDown={(e) => {
-              if (e.key === 'Tab' && suggestion && suggestion !== filter) {
-                e.preventDefault();
-                setFilter(suggestion);
-              } else if (e.key === 'Escape' && filter) {
-                e.preventDefault();
+        <SearchInput
+          value={filter}
+          onChange={setFilter}
+          onClear={() => {
+            setFilter('');
+            setSelectedTerm(null);
+            setShowModal(false);
+          }}
+          placeholder="Rechercher un terme..."
+          isFocused={isFocused}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          inputRef={inputRef}
+          resultCount={searchResults.length}
+          totalCount={lexiqueData.length}
+          onKeyDown={(e) => {
+            if (e.key === 'Tab' && suggestion && suggestion !== filter) {
+              e.preventDefault();
+              setFilter(suggestion);
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              // Open modal if exact match is auto-selected
+              if (selectedTerm && searchResults.some(r => r.matchType === 'exact')) {
+                setShowModal(true);
+              }
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              if (showModal) {
+                // First ESC: Close modal only
+                setShowModal(false);
+              } else if (filter) {
+                // Second ESC: Clear search and reset
                 setFilter('');
                 setSelectedTerm(null);
-                setShowModal(false);
               }
-            }}
-            className="w-full pl-10 pr-28 py-4 bg-transparent text-white placeholder-gray-600 focus:outline-none font-mono text-sm relative z-10"
-          />
-
-          {/* Autocomplete suggestion overlay */}
-          {suggestion && suggestion !== filter && filter && (
-            <div className="absolute left-10 top-1/2 -translate-y-1/2 pointer-events-none font-mono text-sm text-gray-600">
-              <span className="invisible">{filter}</span>
-              <span>{suggestion.slice(filter.length)}</span>
-            </div>
-          )}
-
-          {/* Right side controls */}
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            {/* Clear button (X) */}
-            {filter && (
-              <button
-                onClick={() => {
-                  setFilter('');
-                  setSelectedTerm(null);
-                  setShowModal(false);
-                  inputRef.current?.focus();
-                }}
-                className="p-1.5 hover:bg-white/10 rounded-full transition-colors text-gray-500 hover:text-white"
-                title="Effacer (Esc)"
-              >
-                <X size={14} />
-              </button>
-            )}
-
-            {/* Results counter */}
-            <div className="px-2 py-0.5 bg-blue-900/20 rounded-full">
-              <span className="text-xs font-mono text-gray-400 font-medium">
-                {searchResults.length}/{lexiqueData.length}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Keyboard hint */}
-        <div className="mt-2 text-xs text-gray-600">
-          <span>🔍 Recherche • Tab compléter • Espaces = phrase exacte • Esc effacer</span>
-        </div>
+            }
+          }}
+          autocompleteOverlay={
+            suggestion && suggestion !== filter && filter ? (
+              <div className="absolute left-10 top-1/2 -translate-y-1/2 pointer-events-none font-mono text-sm text-blue-200 z-20">
+                <span className="invisible">{filter.trimStart()}</span>
+                <span>{suggestion.slice(filter.trimStart().length)}</span>
+              </div>
+            ) : null
+          }
+        />
       </div>
 
       {/* Main Content: List Only */}
@@ -221,15 +215,10 @@ export function LexiqueView() {
                           {item.category}
                         </span>
                       )}
-
-                      {/* Match type badge */}
-                      {filter && <MatchTypeBadge type={matchType} compact />}
                     </div>
 
                     {/* Click indicator */}
-                    <div className="text-gray-500">
-                      ▶
-                    </div>
+                    <ChevronRight size={18} className="text-gray-500 group-hover:text-blue-200 transition-colors" />
                   </button>
                 );
               })}

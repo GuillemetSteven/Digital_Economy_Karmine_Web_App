@@ -62,18 +62,39 @@ export function BibliographyView() {
 
   // Calculate autocomplete suggestion
   useEffect(() => {
-    if (filter && searchResults.length > 0) {
-      const firstResult = searchResults[0];
-      const title = firstResult.item.title;
+    const filterNoLeading = filter.trimStart();
 
-      // If the title starts with the filter (case-insensitive), suggest it
-      if (title.toLowerCase().startsWith(filter.toLowerCase())) {
+    // Don't suggest if filter is empty, only spaces, or has trailing spaces
+    if (!filterNoLeading || filter.trimEnd() !== filter || searchResults.length === 0) {
+      setSuggestion('');
+      return;
+    }
+
+    const firstResult = searchResults[0];
+    const title = firstResult.item.title;
+
+    // Check if filter contains spaces (phrase search mode)
+    const isPhraseSearch = filterNoLeading.includes(' ');
+
+    if (isPhraseSearch) {
+      // For phrase searches, only suggest if high-quality match
+      if (
+        (firstResult.matchType === 'exact' ||
+         firstResult.matchType === 'contains' ||
+         firstResult.matchType === 'starts-with') &&
+        title.toLowerCase().startsWith(filterNoLeading.toLowerCase())
+      ) {
         setSuggestion(title);
       } else {
         setSuggestion('');
       }
     } else {
-      setSuggestion('');
+      // Single word: match without leading spaces
+      if (title.toLowerCase().startsWith(filterNoLeading.toLowerCase())) {
+        setSuggestion(title);
+      } else {
+        setSuggestion('');
+      }
     }
   }, [filter, searchResults]);
 
@@ -206,9 +227,9 @@ export function BibliographyView() {
 
               {/* Autocomplete suggestion overlay */}
               {suggestion && suggestion !== filter && filter && (
-                <div className="absolute left-8 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-gray-600">
-                  <span className="invisible">{filter}</span>
-                  <span>{suggestion.slice(filter.length)}</span>
+                <div className="absolute left-8 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-blue-200 z-20">
+                  <span className="invisible">{filter.trimStart()}</span>
+                  <span>{suggestion.slice(filter.trimStart().length)}</span>
                 </div>
               )}
 

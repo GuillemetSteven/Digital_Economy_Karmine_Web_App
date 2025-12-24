@@ -1,6 +1,6 @@
-import { Layers, Grid, BookOpen, BookText } from 'lucide-react';
-import { ViewType, ReportSection } from '../../types';
+import { BookOpen, BookText, Grid, Layers } from 'lucide-react';
 import { theme } from '../../config/theme';
+import { ReportSection, ViewType } from '../../types';
 import { LastUpdateBadge } from './LastUpdateBadge';
 
 interface SidebarProps {
@@ -121,13 +121,11 @@ export function Sidebar({
           <LastUpdateBadge lastUpdate={lastUpdate} />
 
           <div className="flex items-center space-x-3 bg-karmine-surface p-3 rounded-lg border border-blue-900/20">
-            <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center font-bold text-xs text-white">
-              {student
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .toUpperCase()}
-            </div>
+            <img
+              src="imgs/kaiki.jpg"
+              alt="Profile"
+              className="w-8 h-8 rounded object-cover"
+            />
             <div className="overflow-hidden">
               <p className="text-sm font-bold text-white truncate">{student}</p>
               <p className="text-xs text-gray-500 truncate">{year}</p>
