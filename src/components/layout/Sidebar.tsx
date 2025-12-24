@@ -1,6 +1,7 @@
 import { Layers, Grid, BookOpen, BookText } from 'lucide-react';
 import { ViewType, ReportSection } from '../../types';
 import { theme } from '../../config/theme';
+import { LastUpdateBadge } from './LastUpdateBadge';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -8,6 +9,7 @@ interface SidebarProps {
   sections: ReportSection[];
   student: string;
   year: string;
+  lastUpdate: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -23,6 +25,7 @@ export function Sidebar({
   sections,
   student,
   year,
+  lastUpdate,
   isOpen,
   onClose,
 }: SidebarProps) {
@@ -114,6 +117,9 @@ export function Sidebar({
 
         {/* User info */}
         <div className="mt-auto pt-6 border-t border-blue-900/30">
+          {/* Last Update Badge */}
+          <LastUpdateBadge lastUpdate={lastUpdate} />
+
           <div className="flex items-center space-x-3 bg-karmine-surface p-3 rounded-lg border border-blue-900/20">
             <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center font-bold text-xs text-white">
               {student

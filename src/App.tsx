@@ -82,6 +82,7 @@ export default function App() {
           sections={reportConfig.sections}
           student={reportConfig.student}
           year={reportConfig.year}
+          lastUpdate={reportConfig.lastUpdate}
           isOpen={isSidebarOpen}
           onClose={closeSidebar}
         />

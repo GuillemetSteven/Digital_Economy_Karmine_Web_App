@@ -25,6 +25,7 @@ export interface ReportConfig {
   subtitle: string;
   student: string;
   year: string;
+  lastUpdate: string;
   sections: ReportSection[];
 }
 

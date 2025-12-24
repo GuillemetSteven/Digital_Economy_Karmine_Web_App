@@ -124,3 +124,65 @@ body {
 .animate-scale-in {
   animation: scaleIn 0.3s ease-out forwards;
 }
+
+/* Animation spotlight pour le badge Last Update */
+@keyframes spotlightSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateX(50%) skewX(-20deg);
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(200%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+/* Animation d'apparition pour le badge Last Update */
+@keyframes badgeFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation réduite pour l'accessibilité (reduced motion) */
+@keyframes badgeFadeInReduced {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-spotlight-sweep {
+  animation: spotlightSweep 2.5s linear forwards;
+}
+
+.animate-badge-fade-in {
+  animation: badgeFadeIn 400ms ease-out forwards;
+}
+
+/* Support pour prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spotlight-sweep {
+    animation: none;
+  }
+  .animate-badge-fade-in {
+    animation: badgeFadeInReduced 200ms ease-out forwards;
+  }
+}
