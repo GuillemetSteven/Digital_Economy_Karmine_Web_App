@@ -32,7 +32,7 @@ export const reportConfig: ReportConfig = {
           title: "Matrice PESTEL",
           source: "Analyse personnelle",
           src: `${import.meta.env.BASE_URL}imgs/PESTEL_kc.JPG`,
-          pageNumber: 14,
+          pageNumber: 15,
           searchKeywords: ["pestel", "pest", "macro", "environnement", "politique", "economique", "social", "technologique", "ecologique", "legal"],
         },
         {
@@ -40,7 +40,7 @@ export const reportConfig: ReportConfig = {
           title: "5 Forces de Porter",
           source: "Cours Stratégie",
           src: `${import.meta.env.BASE_URL}imgs/5_PORTER.JPG`,
-          pageNumber: 15,
+          pageNumber: 16,
           searchKeywords: ["5 forces de porter", "porter", "porteur", "5 forces", "forces", "concurrence", "fournisseurs", "clients", "entrants", "substituts"],
         },
       ]
@@ -54,7 +54,7 @@ export const reportConfig: ReportConfig = {
           title: "Matrice SWOT",
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/swot_kc.JPG`,
-          pageNumber: 16,
+          pageNumber: 17,
           searchKeywords: ["swot", "forces", "faiblesses", "opportunites", "menaces", "strengths", "weaknesses", "opportunities", "threats"],
         },
         {
@@ -62,7 +62,7 @@ export const reportConfig: ReportConfig = {
           title: "SWOT Consolidé",
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/swot_consolide_kc.JPG`,
-          pageNumber: 17,
+          pageNumber: 18,
           searchKeywords: ["swot consolidé", "swot consolide", "consolide", "consolidé", "cons", "synthese", "global"],
         },
         {
@@ -70,7 +70,7 @@ export const reportConfig: ReportConfig = {
           title: "Analyse VRIO",
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/VRIO_kc.JPG`,
-          pageNumber: 18,
+          pageNumber: 19,
           searchKeywords: ["vrio", "ressources", "capacites", "value", "rarity", "imitability", "organization", "valeur", "rarete", "inimitabilite"],
         },
       ]
@@ -84,7 +84,7 @@ export const reportConfig: ReportConfig = {
           title: "Benchmark Concurrents",
           source: "Sites officiels G2/Vitality",
           src: `${import.meta.env.BASE_URL}imgs/benchmark_kc.JPG`,
-          pageNumber: 19,
+          pageNumber: 20,
           searchKeywords: ["benchmark", "concurrent", "concurrents", "comparaison", "g2", "vitality", "competition"],
         },
         {
@@ -92,7 +92,7 @@ export const reportConfig: ReportConfig = {
           title: "Strategic Canvas",
           source: "Blue Ocean Strategy",
           src: `${import.meta.env.BASE_URL}imgs/STRATEGIC_CANVAS_kc.png`,
-          pageNumber: 21,
+          pageNumber: 22,
           searchKeywords: ["strategic canvas", "strategic", "canvas", "strategie", "ocean bleu", "blue ocean", "canevas", "differentiation"],
         },
         {
@@ -100,7 +100,7 @@ export const reportConfig: ReportConfig = {
           title: "Value Proposition",
           source: "Etude qualitative",
           src: `${import.meta.env.BASE_URL}imgs/Value_Proposition_Canvas_kc.png`,
-          pageNumber: 23,
+          pageNumber: 24,
           searchKeywords: ["value proposition", "value", "proposition", "valeur", "canvas", "canevas", "client", "benefices", "gains", "pains"],
         },
       ]
@@ -122,7 +122,7 @@ export const reportConfig: ReportConfig = {
           title: "Matrice TOWS",
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/tows.png`,
-          pageNumber: 29,
+          pageNumber: 30,
           searchKeywords: ["tows", "taus", "strategie", "swot", "menaces", "opportunites", "forces", "faiblesses"],
         },
       ]

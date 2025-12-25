@@ -250,8 +250,8 @@ export function LexiqueView() {
         return (
           <div className="mt-6 bg-karmine-surface/90 backdrop-blur-md rounded-lg border border-blue-200/30 p-6 animate-fade-in shadow-lg shadow-blue-500/10">
             <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">{removeParentheses(entry.term)}</h3>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h3 className="text-2xl font-bold text-white tracking-tight">{removeParentheses(entry.term)}</h3>
                 {entry.category && (
                   <span className="inline-block text-xs text-blue-400 bg-blue-500/15 px-3 py-1 rounded-md border border-blue-500/30 font-mono uppercase tracking-wide">
                     {entry.category}
@@ -286,8 +286,8 @@ export function LexiqueView() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-start justify-between gap-4 mb-6">
-                  <div>
-                    <h3 className="text-3xl font-bold text-white mb-2">{removeParentheses(entry.term)}</h3>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h3 className="text-3xl font-bold text-white">{removeParentheses(entry.term)}</h3>
                     {entry.category && (
                       <span className="inline-block text-xs text-blue-400 bg-blue-500/15 px-3 py-1 rounded-md border border-blue-500/30 font-mono uppercase tracking-wide">
                         {entry.category}
