@@ -148,8 +148,11 @@ export function SearchInput({
             </button>
           )}
           {/* Keyboard shortcut badge - dimensions fixes */}
-          <kbd className="px-2.5 py-1.5 rounded border border-blue-200/20 bg-[#080c16] text-[10px] font-mono text-blue-200/40 whitespace-nowrap h-7 w-[70px] flex items-center justify-center">
-            {isMac ? '⌘' : 'Ctrl'} + K
+          <kbd className={`px-2.5 py-1.5 rounded border border-blue-200/20 bg-[#080c16] font-mono text-blue-200/40 whitespace-nowrap h-7 flex items-center justify-center gap-1 ${isMac ? 'w-[75px]' : 'w-[70px]'}`}>
+            <span className={isMac ? 'text-[13px] leading-none' : 'text-[10px]'}>
+              {isMac ? '⌘' : 'Ctrl'}
+            </span>
+            <span className="text-[10px]">+ K</span>
           </kbd>
           {/* Counter - dimensions fixes */}
           {showCounter && resultCount !== undefined && totalCount !== undefined && (

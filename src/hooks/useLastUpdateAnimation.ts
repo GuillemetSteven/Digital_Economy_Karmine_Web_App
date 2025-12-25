@@ -1,29 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
+import { getPersistentValue, setPersistentValue } from '../utils/persistenceStorage';
 
 /**
- * Hook pour gérer l'animation "Last Update" avec cookie
+ * Hook pour gérer l'animation "Last Update" avec stockage persistant
  * L'animation ne se joue qu'une seule fois par date de mise à jour
+ * Utilise cookies avec fallback localStorage pour compatibilité Mac/HTTPS
  */
 
 const COOKIE_NAME = 'karmine_last_update_seen';
-
-/**
- * Récupère un cookie par son nom
- */
-const getCookie = (name: string): string | null => {
-  const matches = document.cookie.match(
-    new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
-  );
-  return matches ? decodeURIComponent(matches[1]) : null;
-};
-
-/**
- * Définit un cookie persistant (expire après 60 jours)
- * 60 jours = 60 * 24 * 60 * 60 = 5184000 secondes
- */
-const setCookie = (name: string, value: string): void => {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=5184000; SameSite=Lax`;
-};
 
 interface UseLastUpdateAnimationReturn {
   shouldAnimate: boolean;
@@ -40,11 +24,11 @@ export const useLastUpdateAnimation = (updateDate: string): UseLastUpdateAnimati
 
   useEffect(() => {
     // Vérifie si l'animation a déjà été vue pour cette date
-    const seenDate = getCookie(COOKIE_NAME);
+    const seenDate = getPersistentValue(COOKIE_NAME);
 
     // L'animation doit être jouée si :
-    // 1. Aucun cookie n'existe (première visite)
-    // 2. La date dans le cookie est différente de la date actuelle
+    // 1. Aucune valeur stockée n'existe (première visite)
+    // 2. La date stockée est différente de la date actuelle
     if (seenDate !== updateDate) {
       setShouldAnimate(true);
     }
@@ -55,7 +39,7 @@ export const useLastUpdateAnimation = (updateDate: string): UseLastUpdateAnimati
    * À appeler dans onAnimationEnd de l'animation spotlight
    */
   const markAnimationSeen = useCallback(() => {
-    setCookie(COOKIE_NAME, updateDate);
+    setPersistentValue(COOKIE_NAME, updateDate);
     setShouldAnimate(false);
   }, [updateDate]);
 
