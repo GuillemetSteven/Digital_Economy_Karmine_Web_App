@@ -15,11 +15,6 @@ export function BibliographyView() {
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Focus input on mount
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
   // Fuzzy search with memoization + section filtering
   const searchResults = useMemo(() => {
     const results = fuzzySearch(bibliographieData, filter, (source: BibliographySource) => [
@@ -174,6 +169,7 @@ export function BibliographyView() {
 
   return (
     <div className="px-6 md:px-12 py-12 min-h-screen">
+      <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center space-x-4 mb-4">
@@ -231,16 +227,16 @@ export function BibliographyView() {
 
           {/* Section Filters - Pills (same style as Gallery) */}
           <div className="mb-6">
-            <div className="flex items-center gap-3 overflow-x-auto p-2 scrollbar-hide">
+            <div className="flex items-center gap-2 flex-wrap">
               {/* Bouton "Toutes" */}
               <button
                 onClick={toggleAllSections}
                 className={`
-                  flex items-center gap-2.5 px-5 py-2.5 rounded-md whitespace-nowrap
+                  flex items-center gap-2 px-3 py-1.5 rounded-md whitespace-nowrap
                   transition-all duration-200 font-mono text-xs uppercase tracking-wider
                   outline-none
                   ${selectedSections.size === getSections().length
-                    ? 'bg-blue-500/20 text-blue-200 border-2 border-blue-400/60 shadow-[0_0_8px_rgba(59,130,246,0.08)]'
+                    ? 'bg-blue-500/15 text-blue-200 border border-blue-400/40'
                     : 'bg-blue-900/20 border border-blue-800/40 text-gray-400 hover:bg-blue-800/30 hover:border-blue-700/60 hover:text-blue-200'
                   }
                 `}
@@ -267,11 +263,11 @@ export function BibliographyView() {
                     key={section}
                     onClick={() => toggleSectionFilter(section)}
                     className={`
-                      flex items-center gap-2.5 px-5 py-2.5 rounded-md whitespace-nowrap
+                      flex items-center gap-2 px-3 py-1.5 rounded-md whitespace-nowrap
                       transition-all duration-200 font-mono text-xs uppercase tracking-wider
                       outline-none
                       ${isActive
-                        ? 'bg-blue-500/20 text-blue-200 border-2 border-blue-400/60 shadow-[0_0_8px_rgba(59,130,246,0.08)]'
+                        ? 'bg-blue-500/15 text-blue-200 border border-blue-400/40'
                         : 'bg-blue-900/20 border border-blue-800/40 text-gray-400 hover:bg-blue-800/30 hover:border-blue-700/60 hover:text-blue-200'
                       }
                     `}
@@ -294,7 +290,7 @@ export function BibliographyView() {
 
           {/* Results - Compact List with Sticky Section Headers */}
           {searchResults.length > 0 ? (
-            <div className="bg-karmine-surface rounded-lg border border-gray-800 overflow-hidden">
+            <div className="bg-karmine-surface/90 backdrop-blur-sm rounded-sm border border-blue-200/20 overflow-hidden">
               {(() => {
                 let globalIndex = 0;
                 return Array.from(groupedResults.entries()).map(([section, items]) => (
@@ -415,6 +411,7 @@ export function BibliographyView() {
           scrollbar-width: none;
         }
       `}</style>
+      </div>
     </div>
   );
 }

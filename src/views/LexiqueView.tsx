@@ -17,11 +17,6 @@ export function LexiqueView() {
   const [suggestion, setSuggestion] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input on mount
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
   // Fuzzy search - search in term without parentheses and category (NOT definition)
   const searchResults = useMemo(() => {
     const results = fuzzySearch(lexiqueData, filter, (entry: LexiqueEntry) => [
@@ -106,6 +101,7 @@ export function LexiqueView() {
 
   return (
     <div className="px-6 md:px-12 py-12 min-h-screen">
+      <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center space-x-4 mb-4">
@@ -175,7 +171,7 @@ export function LexiqueView() {
       <div className="space-y-4">
         {/* Terms List */}
         {searchResults.length > 0 ? (
-          <div className="bg-karmine-surface/90 backdrop-blur-sm rounded-lg border border-blue-200/20 overflow-hidden shadow-lg shadow-blue-500/5">
+          <div className="bg-karmine-surface/90 backdrop-blur-sm rounded-sm border border-blue-200/20 overflow-hidden">
             <div className="divide-y divide-blue-900/20">
               {searchResults.map(({ item, matchIndices, matchType }) => {
                 const cleanTerm = removeParentheses(item.term);
@@ -252,7 +248,7 @@ export function LexiqueView() {
         if (!entry) return null;
 
         return (
-          <div className="mt-6 bg-karmine-surface/90 backdrop-blur-sm rounded-lg border border-blue-500/30 p-6 animate-fade-in shadow-lg shadow-blue-500/10">
+          <div className="mt-6 bg-karmine-surface/90 backdrop-blur-md rounded-lg border border-blue-200/30 p-6 animate-fade-in shadow-lg shadow-blue-500/10">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">{removeParentheses(entry.term)}</h3>
@@ -286,7 +282,7 @@ export function LexiqueView() {
             {/* Modal */}
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
               <div
-                className="bg-karmine-surface rounded-2xl border-2 border-blue-500/50 p-8 max-w-2xl w-full shadow-2xl shadow-blue-500/20 animate-scale-in pointer-events-auto max-h-[80vh] overflow-y-auto"
+                className="bg-karmine-surface/90 backdrop-blur-md rounded-lg border border-blue-200/30 p-8 max-w-2xl w-full shadow-2xl shadow-blue-500/20 animate-scale-in pointer-events-auto max-h-[80vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-start justify-between gap-4 mb-6">
@@ -316,6 +312,7 @@ export function LexiqueView() {
           </>
         );
       })()}
+      </div>
     </div>
   );
 }

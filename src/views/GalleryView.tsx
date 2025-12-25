@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Images, Expand } from 'lucide-react';
 import { ReportSection, ReportImage } from '../types';
 import { PlaceholderImage } from '../components/PlaceholderImage';
 import { SearchInput } from '../components/SearchInput';
-import { fuzzySearch } from '../utils/fuzzySearch';
+import { normalizeString } from '../utils/normalizeString';
 
 interface GalleryViewProps {
   sections: ReportSection[];
@@ -20,7 +20,6 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
   const [filter, setFilter] = useState('');
   const [selectedSection, setSelectedSection] = useState<string>('all');
   const [isFocused, setIsFocused] = useState(false);
-  const [suggestion, setSuggestion] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Get unique sections for filters
@@ -31,61 +30,130 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
     s.images.map((img) => ({ ...img, sectionTitle: s.title }))
   );
 
-  // Fuzzy search on images - search in title, sectionTitle, and searchKeywords
-  const searchResults = useMemo(() => {
-    return fuzzySearch(allImages, filter, (img: ReportImage & { sectionTitle: string }) => [
-      img.title,
-      img.sectionTitle,
-      ...(img.searchKeywords || [])
-    ]);
+  // Autocomplétion à 2 niveaux : afficher le KEYWORD, Tab remplace par le TITRE
+  const suggestionData = useMemo((): { matchedKeyword: string; imageTitle: string } | null => {
+    const trimmed = filter.trimStart();
+    // Minimum 2 caractères pour l'autocomplétion
+    if (!trimmed || trimmed.length < 2 || filter.trimEnd() !== filter) return null;
+
+    const normalizedQuery = normalizeString(trimmed);
+
+    // Collecter les matchs avec keyword + titre + score
+    const matches: { keyword: string; title: string; score: number }[] = [];
+
+    for (const img of allImages) {
+      const normalizedTitle = normalizeString(img.title);
+      const keywords = img.searchKeywords || [];
+
+      // Chercher le meilleur keyword qui commence par la query
+      for (const kw of keywords) {
+        const normalizedKw = normalizeString(kw);
+
+        // Le keyword doit commencer par la query
+        if (!normalizedKw.startsWith(normalizedQuery)) continue;
+
+        // Ignorer les keywords trop longs (> 15 chars) sauf match exact
+        if (kw.length > 15 && normalizedKw !== normalizedQuery) continue;
+
+        // Calculer le score
+        let score = 0;
+
+        if (normalizedKw === normalizedQuery) {
+          // Keyword exact : score max
+          score = 200;
+          // Bonus si le titre contient le mot
+          if (normalizedTitle.includes(normalizedQuery)) score += 50;
+        } else {
+          // Keyword commence par query : score basé sur précision
+          const precision = normalizedQuery.length / normalizedKw.length;
+          score = 50 + Math.round(precision * 100); // Score entre 50 et 150
+
+          // Bonus si le titre contient un mot qui commence par la query
+          const titleWords = normalizedTitle.split(/\s+/);
+          if (titleWords.some(w => w.startsWith(normalizedQuery))) {
+            score += 30;
+          }
+        }
+
+        matches.push({ keyword: kw, title: img.title, score });
+      }
+
+      // Aussi matcher sur le titre directement
+      if (normalizedTitle.startsWith(normalizedQuery)) {
+        const precision = normalizedQuery.length / normalizedTitle.length;
+        const score = 100 + Math.round(precision * 50); // Score entre 100 et 150
+        matches.push({ keyword: img.title, title: img.title, score });
+      }
+    }
+
+    // Trier par score décroissant, puis par longueur de keyword (plus court = mieux)
+    matches.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.keyword.length - b.keyword.length;
+    });
+
+    if (matches.length === 0) return null;
+
+    return {
+      matchedKeyword: matches[0].keyword,
+      imageTitle: matches[0].title
+    };
   }, [allImages, filter]);
 
-  // Apply section filter
+  // Pour Tab : le TITRE de l'image
+  const titleForTab = suggestionData?.imageTitle || '';
+
+  // Pour l'affichage : calculer la partie restante du TITRE (pas du keyword)
+  const displayRemainder = useMemo(() => {
+    if (!suggestionData || !filter.trim()) return '';
+
+    const normalizedFilter = normalizeString(filter.trimStart());
+    const normalizedTitle = normalizeString(suggestionData.imageTitle);
+
+    // Si le titre normalisé commence par le filtre normalisé
+    if (normalizedTitle.startsWith(normalizedFilter)) {
+      // Retourner la partie du titre après la longueur du filtre
+      return suggestionData.imageTitle.slice(filter.trimStart().length);
+    }
+
+    // Sinon, le keyword matche mais pas le titre → afficher le titre complet
+    return suggestionData.imageTitle;
+  }, [suggestionData, filter]);
+
+  // Filtrage: mot complet uniquement (keyword exact ou mot exact du titre)
   const filteredImages = useMemo(() => {
-    return searchResults
-      .map(result => result.item)
-      .filter(img => selectedSection === 'all' || img.sectionTitle === selectedSection);
-  }, [searchResults, selectedSection]);
+    const trimmed = filter.trim();
 
-  // Calculate autocomplete suggestion
-  useEffect(() => {
-    const filterNoLeading = filter.trimStart();
-
-    if (!filterNoLeading || filter.trimEnd() !== filter || searchResults.length === 0) {
-      setSuggestion('');
-      return;
+    // Si pas de filtre, afficher toutes les images (avec filtre section)
+    if (!trimmed) {
+      return allImages.filter(img => selectedSection === 'all' || img.sectionTitle === selectedSection);
     }
 
-    const firstResult = searchResults[0];
-    const firstImageTitle = firstResult.item.title;
-    const isPhraseSearch = filterNoLeading.includes(' ');
+    const normalizedFilter = normalizeString(trimmed);
 
-    if (isPhraseSearch) {
-      // For phrase searches, only suggest if high-quality match
-      if (
-        (firstResult.matchType === 'exact' ||
-         firstResult.matchType === 'contains' ||
-         firstResult.matchType === 'starts-with') &&
-        firstImageTitle.toLowerCase().startsWith(filterNoLeading.toLowerCase())
-      ) {
-        setSuggestion(firstImageTitle);
-      } else {
-        setSuggestion('');
-      }
-    } else {
-      // Single word: suggest if title starts with the search
-      if (firstImageTitle.toLowerCase().startsWith(filterNoLeading.toLowerCase())) {
-        setSuggestion(firstImageTitle);
-      } else {
-        setSuggestion('');
-      }
-    }
-  }, [filter, searchResults]);
+    const matched = allImages.filter(img => {
+      // Match exact keyword
+      const keywordMatch = img.searchKeywords?.some(kw =>
+        normalizeString(kw) === normalizedFilter
+      );
+      // Match mot exact dans titre (chaque mot séparément)
+      const titleWords = img.title.split(/\s+/);
+      const titleWordMatch = titleWords.some(word =>
+        normalizeString(word) === normalizedFilter
+      );
+      // Match titre complet
+      const fullTitleMatch = normalizeString(img.title) === normalizedFilter;
 
-  // Focus input on mount
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+      return keywordMatch || titleWordMatch || fullTitleMatch;
+    });
+
+    // Si aucun match mot complet → afficher toutes les images
+    const baseImages = matched.length > 0 ? matched : allImages;
+
+    // Appliquer le filtre de section
+    return baseImages.filter(img => selectedSection === 'all' || img.sectionTitle === selectedSection);
+  }, [allImages, filter, selectedSection]);
+
 
   // Count images per section for badges
   const sectionCounts = sections.reduce((acc, section) => {
@@ -95,9 +163,9 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
 
   // Keyboard event handler
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Tab' && suggestion && suggestion !== filter) {
+    if (e.key === 'Tab' && titleForTab && titleForTab !== filter) {
       e.preventDefault();
-      setFilter(suggestion);
+      setFilter(titleForTab);
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (filteredImages.length > 0) {
@@ -124,7 +192,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
         </div>
 
         {/* Search Input with Fuzzy Search */}
-        <div className="max-w-md mb-6">
+        <div className="max-w-lg mb-6">
           <SearchInput
             value={filter}
             onChange={setFilter}
@@ -132,7 +200,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
               setFilter('');
               inputRef.current?.focus();
             }}
-            placeholder="Rechercher une oeuvre..."
+            placeholder="Rechercher un graphique..."
             isFocused={isFocused}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -145,10 +213,10 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
             showChevron={filteredImages.length > 0}
             onKeyDown={handleKeyDown}
             autocompleteOverlay={
-              suggestion && suggestion !== filter && filter ? (
+              displayRemainder ? (
                 <div className="absolute left-14 top-4 pointer-events-none font-mono text-sm text-gray-500 z-20">
                   <span className="invisible">{filter.trimStart()}</span>
-                  <span>{suggestion.slice(filter.trimStart().length)}</span>
+                  <span>{displayRemainder}</span>
                 </div>
               ) : null
             }
@@ -156,7 +224,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
         </div>
 
         {/* Section Filters - Pills */}
-        <div className="flex items-center gap-3 overflow-x-auto p-2 scrollbar-hide">
+        <div className="flex items-center gap-2 flex-wrap">
           {uniqueSections.map((section) => {
             const count = section === 'all' ? allImages.length : sectionCounts[section] || 0;
             const isActive = selectedSection === section;
@@ -166,11 +234,11 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                 key={section}
                 onClick={() => setSelectedSection(section)}
                 className={`
-                  flex items-center gap-2.5 px-5 py-2.5 rounded-md whitespace-nowrap
+                  flex items-center gap-2 px-3 py-1.5 rounded-md whitespace-nowrap
                   transition-all duration-200 font-mono text-xs uppercase tracking-wider
                   outline-none
                   ${isActive
-                    ? 'bg-blue-500/20 text-blue-200 border-2 border-blue-400/60 shadow-[0_0_8px_rgba(59,130,246,0.08)]'
+                    ? 'bg-blue-500/15 text-blue-200 border border-blue-400/40'
                     : 'bg-blue-900/20 border border-blue-800/40 text-gray-400 hover:bg-blue-800/30 hover:border-blue-700/60 hover:text-blue-200'
                   }
                 `}

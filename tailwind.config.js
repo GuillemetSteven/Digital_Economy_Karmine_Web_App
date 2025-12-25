@@ -28,6 +28,7 @@ export default {
         'key-blink': 'keyBlink 0.15s ease-out',
         'border-glow': 'borderGlow 0.3s ease-out forwards',
         'text-pulse': 'textPulse 0.3s ease-in-out',
+        'counter-glow': 'counterGlow 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -76,6 +77,14 @@ export default {
           '0%': { opacity: '0.5' },
           '50%': { opacity: '1' },
           '100%': { opacity: '0.5' }
+        },
+        counterGlow: {
+          '0%, 100%': {
+            textShadow: '0 0 4px rgba(147, 197, 253, 0.4)'
+          },
+          '50%': {
+            textShadow: '0 0 10px rgba(147, 197, 253, 0.8), 0 0 20px rgba(147, 197, 253, 0.4)'
+          }
         }
       },
     },

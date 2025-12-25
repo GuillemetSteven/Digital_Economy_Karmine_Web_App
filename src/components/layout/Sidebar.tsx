@@ -1,4 +1,4 @@
-import { BookOpen, BookText, Grid, Layers } from 'lucide-react';
+import { FileText, Image, BookA, Library } from 'lucide-react';
 import { theme } from '../../config/theme';
 import { ReportSection, ViewType } from '../../types';
 import { LastUpdateBadge } from './LastUpdateBadge';
@@ -59,7 +59,7 @@ export function Sidebar({
               currentView === 'sections' ? navButtonActive : navButtonInactive
             }`}
           >
-            <Layers size={18} />
+            <FileText size={18} />
             <span className="font-medium">Rapport</span>
           </button>
 
@@ -69,18 +69,8 @@ export function Sidebar({
               currentView === 'gallery' ? navButtonActive : navButtonInactive
             }`}
           >
-            <Grid size={18} />
+            <Image size={18} />
             <span className="font-medium">Galerie</span>
-          </button>
-
-          <button
-            onClick={() => handleNavClick('biblio')}
-            className={`${navButtonBase} ${
-              currentView === 'biblio' ? navButtonActive : navButtonInactive
-            }`}
-          >
-            <BookOpen size={18} />
-            <span className="font-medium">Bibliographie</span>
           </button>
 
           <button
@@ -89,8 +79,18 @@ export function Sidebar({
               currentView === 'lexique' ? navButtonActive : navButtonInactive
             }`}
           >
-            <BookText size={18} />
+            <BookA size={18} />
             <span className="font-medium">Lexique</span>
+          </button>
+
+          <button
+            onClick={() => handleNavClick('biblio')}
+            className={`${navButtonBase} ${
+              currentView === 'biblio' ? navButtonActive : navButtonInactive
+            }`}
+          >
+            <Library size={18} />
+            <span className="font-medium">Bibliographie</span>
           </button>
         </nav>
 

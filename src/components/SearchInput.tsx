@@ -38,6 +38,9 @@ export function SearchInput({
   onKeyDown,
   autocompleteOverlay,
 }: SearchInputProps) {
+  // Detect Mac vs Windows
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
   // État pour suivre quelles touches sont enfoncées
   const [activeKeys, setActiveKeys] = useState({
     Enter: false,
@@ -45,12 +48,18 @@ export function SearchInput({
     Escape: false
   });
 
-  // Event listeners globaux pour les animations de badges
+  // Event listeners globaux pour les animations de badges et raccourci Ctrl+K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') setActiveKeys(prev => ({ ...prev, Enter: true }));
       if (e.key === 'Tab') setActiveKeys(prev => ({ ...prev, Tab: true }));
       if (e.key === 'Escape') setActiveKeys(prev => ({ ...prev, Escape: true }));
+
+      // Ctrl+K / Cmd+K pour focus l'input
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        inputRef?.current?.focus();
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -66,7 +75,7 @@ export function SearchInput({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [inputRef]);
 
   const handleClear = () => {
     onChange('');
@@ -126,8 +135,8 @@ export function SearchInput({
         {/* Autocomplete overlay */}
         {autocompleteOverlay}
 
-        {/* Clear button + Counter */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 z-20">
+        {/* Clear button + Keyboard shortcut + Counter */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3 z-20">
           {/* Clear button */}
           {showClearButton && value && (
             <button
@@ -138,9 +147,13 @@ export function SearchInput({
               <X size={14} />
             </button>
           )}
-          {/* Counter */}
+          {/* Keyboard shortcut badge - dimensions fixes */}
+          <kbd className="px-2.5 py-1.5 rounded border border-blue-200/20 bg-[#080c16] text-[10px] font-mono text-blue-200/40 whitespace-nowrap h-7 w-[70px] flex items-center justify-center">
+            {isMac ? '⌘' : 'Ctrl'} + K
+          </kbd>
+          {/* Counter - dimensions fixes */}
           {showCounter && resultCount !== undefined && totalCount !== undefined && (
-            <span className="text-xs font-mono text-gray-400">
+            <span className="text-sm font-mono font-bold text-blue-300 w-[60px] h-7 flex items-center justify-end">
               {resultCount}/{totalCount}
             </span>
           )}

@@ -6,7 +6,7 @@ export const reportConfig: ReportConfig = {
   subtitle: "Digital Company Economy",
   student: "Steven Guillemet",
   year: "2025-2026",
-  lastUpdate: "2024-12-24",
+  lastUpdate: "2025-12-25",
   sections: [
     {
       id: 'intro',
@@ -19,7 +19,7 @@ export const reportConfig: ReportConfig = {
           src: `${import.meta.env.BASE_URL}imgs/poesie_video_kamel.mp4`,
           mediaType: 'video' as const,
           videoThumbnail: `${import.meta.env.BASE_URL}imgs/kameto.jpg`,
-          searchKeywords: ["presentation", "kamel", "kameto", "video", "intro"],
+          searchKeywords: ["présentation kamel", "presentation kamel", "presentation", "kamel", "kameto", "video", "intro", "pres"],
         },
       ]
     },
@@ -41,7 +41,7 @@ export const reportConfig: ReportConfig = {
           source: "Cours Stratégie",
           src: `${import.meta.env.BASE_URL}imgs/5_PORTER.JPG`,
           pageNumber: 15,
-          searchKeywords: ["porter", "porteur", "5 forces", "forces", "concurrence", "fournisseurs", "clients", "entrants", "substituts"],
+          searchKeywords: ["5 forces de porter", "porter", "porteur", "5 forces", "forces", "concurrence", "fournisseurs", "clients", "entrants", "substituts"],
         },
       ]
     },
@@ -63,7 +63,7 @@ export const reportConfig: ReportConfig = {
           source: "Interne",
           src: `${import.meta.env.BASE_URL}imgs/swot_consolide_kc.JPG`,
           pageNumber: 17,
-          searchKeywords: ["swot", "consolide", "consolidé", "cons", "synthese", "global"],
+          searchKeywords: ["swot consolidé", "swot consolide", "consolide", "consolidé", "cons", "synthese", "global"],
         },
         {
           id: 303,
@@ -93,7 +93,7 @@ export const reportConfig: ReportConfig = {
           source: "Blue Ocean Strategy",
           src: `${import.meta.env.BASE_URL}imgs/STRATEGIC_CANVAS_kc.png`,
           pageNumber: 21,
-          searchKeywords: ["strategic", "canvas", "strategie", "ocean bleu", "blue ocean", "canevas", "differentiation"],
+          searchKeywords: ["strategic canvas", "strategic", "canvas", "strategie", "ocean bleu", "blue ocean", "canevas", "differentiation"],
         },
         {
           id: 403,
@@ -101,7 +101,7 @@ export const reportConfig: ReportConfig = {
           source: "Etude qualitative",
           src: `${import.meta.env.BASE_URL}imgs/Value_Proposition_Canvas_kc.png`,
           pageNumber: 23,
-          searchKeywords: ["value", "proposition", "valeur", "canvas", "canevas", "client", "benefices", "gains", "pains"],
+          searchKeywords: ["value proposition", "value", "proposition", "valeur", "canvas", "canevas", "client", "benefices", "gains", "pains"],
         },
       ]
     },
@@ -115,7 +115,7 @@ export const reportConfig: ReportConfig = {
           source: "Strategyzer",
           src: `${import.meta.env.BASE_URL}imgs/business_model_canvas_kc.JPG`,
           pageNumber: 26,
-          searchKeywords: ["business", "model", "canvas", "bmc", "canevas", "osterwalder", "strategyzer", "proposition"],
+          searchKeywords: ["business model canvas", "business model", "business", "model", "canvas", "bmc", "canevas", "osterwalder", "strategyzer"],
         },
         {
           id: 502,

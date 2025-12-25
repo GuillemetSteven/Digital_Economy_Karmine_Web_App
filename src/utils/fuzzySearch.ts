@@ -196,13 +196,13 @@ export function highlightMatches(
     return text;
   }
 
-  // Subtle, minimal highlighting
+  // Uniform orange highlighting for all match types
   const highlightClasses = {
     'exact': '', // Never used since we return early
-    'word-exact': 'bg-blue-500/30 text-blue-100 font-medium px-0.5',
-    'starts-with': 'bg-purple-500/30 text-purple-100 font-medium px-0.5',
-    'contains': 'bg-yellow-500/30 text-yellow-100 font-medium px-0.5',
-    'fuzzy': 'bg-gray-500/30 text-gray-100 font-medium px-0.5',
+    'word-exact': 'bg-orange-500/40 text-orange-100 font-medium px-0.5',
+    'starts-with': 'bg-orange-500/40 text-orange-100 font-medium px-0.5',
+    'contains': 'bg-orange-500/40 text-orange-100 font-medium px-0.5',
+    'fuzzy': 'bg-orange-500/40 text-orange-100 font-medium px-0.5',
   };
 
   const highlightClass = highlightClasses[matchType];
