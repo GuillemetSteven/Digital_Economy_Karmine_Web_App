@@ -22,23 +22,50 @@ const formatDate = (isoDate: string): string => {
 
 /**
  * Badge "Last Update" avec animation spotlight cinématographique
- * L'animation ne se joue qu'une fois par date de mise à jour grâce au système de cookie
+ * L'animation ne se joue qu'une fois par date de mise à jour grâce au localStorage
  * L'animation est délayée de 4500ms pour attendre que le Loader soit complètement fini
+ *
+ * Gestion de prefers-reduced-motion:
+ * - Si activé → simple flash bleu (600ms) au lieu du spotlight
+ * - Si désactivé → animation spotlight complète (2.5s)
  */
 export const LastUpdateBadge: React.FC<LastUpdateBadgeProps> = ({ lastUpdate }) => {
   const { shouldAnimate, markAnimationSeen } = useLastUpdateAnimation(lastUpdate);
   const [showSpotlight, setShowSpotlight] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // Délayer l'animation spotlight jusqu'à ce que le loader soit complètement fini
+  // Détecter prefers-reduced-motion au montage
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+  }, []);
+
+  // Délayer l'animation jusqu'à ce que le loader soit complètement fini
   useEffect(() => {
     if (shouldAnimate) {
-      // Attendre 4500ms (loader 4000ms + fade 300ms + marge 200ms)
       const timer = setTimeout(() => {
-        setShowSpotlight(true);
+        if (prefersReducedMotion) {
+          // Animation réduite : simple flash
+          setShowFlash(true);
+          setTimeout(() => {
+            setShowFlash(false);
+            markAnimationSeen();
+          }, 600);
+        } else {
+          // Animation complète : spotlight
+          setShowSpotlight(true);
+        }
       }, 4500);
       return () => clearTimeout(timer);
     }
-  }, [shouldAnimate]);
+  }, [shouldAnimate, prefersReducedMotion, markAnimationSeen]);
+
+  // Handler pour la fin de l'animation spotlight
+  const handleAnimationEnd = () => {
+    markAnimationSeen();
+    setShowSpotlight(false);
+  };
 
   return (
     <div className="relative mb-3 animate-badge-fade-in">
@@ -54,12 +81,19 @@ export const LastUpdateBadge: React.FC<LastUpdateBadgeProps> = ({ lastUpdate }) 
         </div>
       </div>
 
-      {/* Overlay spotlight - UNIQUEMENT si showSpotlight est true */}
+      {/* Flash simple pour prefers-reduced-motion */}
+      {showFlash && (
+        <div
+          className="absolute inset-0 rounded-lg pointer-events-none bg-blue-400/40 animate-pulse"
+        />
+      )}
+
+      {/* Overlay spotlight - animation complète */}
       {showSpotlight && (
         <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
           <div
             className="absolute inset-0 animate-spotlight-sweep"
-            onAnimationEnd={markAnimationSeen}
+            onAnimationEnd={handleAnimationEnd}
             style={{
               background:
                 'radial-gradient(ellipse, rgba(255,255,255,0.8) 0%, rgba(59,130,246,0.5) 30%, transparent 70%)',
