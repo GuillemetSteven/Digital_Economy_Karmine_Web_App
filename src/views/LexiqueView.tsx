@@ -9,7 +9,7 @@ const removeParentheses = (text: string): string => {
   return text.replace(/\s*\([^)]*\)/g, '').trim();
 };
 
-export function LexiqueView() {
+export default function LexiqueView() {
   const [filter, setFilter] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);

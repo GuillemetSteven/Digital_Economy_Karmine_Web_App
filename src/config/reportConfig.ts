@@ -6,7 +6,7 @@ export const reportConfig: ReportConfig = {
   subtitle: "Digital Company Economy",
   student: "Steven Guillemet",
   year: "2025-2026",
-  lastUpdate: "2025-12-25",
+  lastUpdate: "2025-12-26",
   sections: [
     {
       id: 'intro',

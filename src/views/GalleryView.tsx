@@ -10,13 +10,14 @@ interface GalleryViewProps {
   onImageClick: (img: ReportImage, imagesContext?: ReportImage[]) => void;
 }
 
-// Bento Grid size pattern (repeating every 8 items)
-const getBentoSize = (index: number): string => {
-  const pattern = ['large', 'medium', 'medium', 'medium', 'wide', 'medium', 'tall', 'medium'];
-  return pattern[index % pattern.length];
+// Bento Grid size pattern (repeating every 8 items) - moved outside component for memoization
+const BENTO_SIZE_PATTERN = ['large', 'medium', 'medium', 'medium', 'wide', 'medium', 'tall', 'medium'] as const;
+
+const getBentoSize = (index: number): typeof BENTO_SIZE_PATTERN[number] => {
+  return BENTO_SIZE_PATTERN[index % BENTO_SIZE_PATTERN.length];
 };
 
-export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
+export default function GalleryView({ sections, onImageClick }: GalleryViewProps) {
   const [filter, setFilter] = useState('');
   const [selectedSection, setSelectedSection] = useState<string>('all');
   const [isFocused, setIsFocused] = useState(false);
@@ -191,7 +192,6 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
           </div>
         </div>
 
-        {/* Search Input with Fuzzy Search */}
         <div className="max-w-lg mb-6">
           <SearchInput
             value={filter}
@@ -223,7 +223,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
           />
         </div>
 
-        {/* Section Filters - Pills */}
+        {/* Filtres */}
         <div className="flex items-center gap-2 flex-wrap">
           {uniqueSections.map((section) => {
             const count = section === 'all' ? allImages.length : sectionCounts[section] || 0;
@@ -261,7 +261,7 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
         </div>
       </div>
 
-      {/* Bento Grid */}
+      {/* Grille */}
       {filteredImages.length > 0 ? (
         <div className="bento-grid">
           {filteredImages.map((img, index) => {
@@ -283,7 +283,6 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                 }}
                 onClick={() => onImageClick(img, allImages)}
               >
-                {/* Image Container */}
                 <div className="absolute inset-0">
                   {img.src ? (
                     <img
@@ -299,15 +298,12 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
                   )}
                 </div>
 
-                {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
 
-                {/* Expand Icon - Top Right */}
                 <div className="absolute top-4 right-4 p-2.5 bg-white/10 backdrop-blur-md rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 hover:bg-white/20 hover:scale-110">
                   <Expand size={18} className="text-white" />
                 </div>
 
-                {/* Content Overlay - Bottom with Glassmorphism */}
                 <div className="absolute bottom-0 left-0 right-0 p-5 backdrop-blur-md bg-white/5 border-t border-white/10">
                   <h4 className="text-white text-base font-bold line-clamp-2 group-hover:text-blue-300 transition-colors">
                     {img.title}
@@ -333,7 +329,6 @@ export function GalleryView({ sections, onImageClick }: GalleryViewProps) {
         </div>
       )}
 
-      {/* Inline styles for Bento Grid */}
       <style>{`
         .bento-grid {
           display: grid;

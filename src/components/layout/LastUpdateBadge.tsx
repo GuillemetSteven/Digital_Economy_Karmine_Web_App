@@ -23,7 +23,8 @@ const formatDate = (isoDate: string): string => {
 /**
  * Badge "Last Update" avec animation spotlight cinématographique
  * L'animation ne se joue qu'une fois par date de mise à jour grâce au localStorage
- * L'animation est délayée de 4500ms pour attendre que le Loader soit complètement fini
+ * L'animation est délayée de 3500ms pour attendre que le Loader soit complètement fini
+ * (3000ms loader + 500ms buffer)
  *
  * Gestion de prefers-reduced-motion:
  * - Si activé → simple flash bleu (600ms) au lieu du spotlight
@@ -56,7 +57,7 @@ export const LastUpdateBadge: React.FC<LastUpdateBadgeProps> = ({ lastUpdate }) 
           // Animation complète : spotlight
           setShowSpotlight(true);
         }
-      }, 4500);
+      }, 3500);  // Synchronized with loader: 3000ms + 500ms buffer
       return () => clearTimeout(timer);
     }
   }, [shouldAnimate, prefersReducedMotion, markAnimationSeen]);

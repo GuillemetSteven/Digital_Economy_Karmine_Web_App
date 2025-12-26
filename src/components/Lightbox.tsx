@@ -112,7 +112,7 @@ export function Lightbox({
         animation: 'lightboxFadeIn 0.3s ease-out'
       }}
     >
-      {/* Close Button */}
+      {/* Bouton fermer */}
       <button
         onClick={onClose}
         className={`absolute top-6 right-6 p-3 ${
@@ -125,7 +125,7 @@ export function Lightbox({
         <X size={24} />
       </button>
 
-      {/* Main Container */}
+      {/* Conteneur principal */}
       <div
         className={`relative w-full shadow-2xl transition-all duration-300 overflow-hidden ${
           isFullscreen
@@ -134,13 +134,11 @@ export function Lightbox({
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Image Container */}
         <div
           className={`flex-1 bg-black flex items-center justify-center relative group overflow-hidden ${
             isFullscreen ? 'p-0 h-screen' : 'p-4 min-h-[50vh] md:min-h-[85vh]'
           }`}
         >
-          {/* Fullscreen Toggle */}
           <button
             onClick={toggleFullscreen}
             className={`absolute top-6 left-6 p-3 ${
@@ -153,7 +151,7 @@ export function Lightbox({
             {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
           </button>
 
-          {/* Navigation Buttons */}
+          {/* Navigation */}
           {hasNavigation && (
             <>
               <NavigationButton
@@ -171,7 +169,6 @@ export function Lightbox({
             </>
           )}
 
-          {/* Image Counter */}
           {hasNavigation && (
             <div className={`absolute top-6 left-1/2 -translate-x-1/2 px-4 py-2 ${
               isLightImage
@@ -182,7 +179,6 @@ export function Lightbox({
             </div>
           )}
 
-          {/* Image/Video Display */}
           {content.src ? (
             isVideo ? (
               <div className="w-full h-full flex items-center justify-center px-8">
@@ -231,7 +227,6 @@ export function Lightbox({
             </div>
           )}
 
-          {/* Zoom Controls */}
           {content.src && !isVideo && (
             <ZoomControls
               zoomLevel={zoomLevel}
@@ -243,7 +238,7 @@ export function Lightbox({
           )}
         </div>
 
-        {/* Sidebar Info - Hidden in fullscreen */}
+        {/* Panneau lat\u00e9ral (cach\u00e9 en plein \u00e9cran) */}
         {!isFullscreen && (
           <div className="w-full md:w-80 bg-gradient-to-b from-karmine-surface to-karmine-darker p-8 border-l border-blue-900/30 flex flex-col transition-all duration-300">
             <div className="mb-auto">
@@ -251,7 +246,6 @@ export function Lightbox({
               <div className="w-12 h-1 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full mb-8"></div>
 
               <div className="space-y-6">
-                {/* Page Number */}
                 {content.pageNumber && (
                   <div>
                     <h4 className="text-xs uppercase tracking-widest text-gray-500 mb-3 font-bold">
@@ -267,7 +261,6 @@ export function Lightbox({
               </div>
             </div>
 
-            {/* Download Button */}
             <div className="pt-6 border-t border-blue-900/40 mt-6">
               <button
                 onClick={handleDownload}

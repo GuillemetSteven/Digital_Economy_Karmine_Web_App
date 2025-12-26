@@ -3,10 +3,9 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { bibliographieData, BibliographySource, getSections } from '../data/bibliographieData';
 import { fuzzySearch, highlightMatches } from '../utils/fuzzySearch';
 import { MatchType } from '../types/search';
-import { MatchTypeBadge } from '../components/MatchTypeBadge';
 import { SearchInput } from '../components/SearchInput';
 
-export function BibliographyView() {
+export default function BibliographyView() {
   const [filter, setFilter] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set(getSections()));
@@ -188,7 +187,6 @@ export function BibliographyView() {
         </p>
       </div>
 
-          {/* Fuzzy Search Input */}
           <div className="mb-6">
             <SearchInput
               value={filter}
@@ -225,10 +223,9 @@ export function BibliographyView() {
             />
           </div>
 
-          {/* Section Filters - Pills (same style as Gallery) */}
+          {/* Filtres */}
           <div className="mb-6">
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Bouton "Toutes" */}
               <button
                 onClick={toggleAllSections}
                 className={`
@@ -253,7 +250,6 @@ export function BibliographyView() {
                 </span>
               </button>
 
-              {/* Badges individuels par section */}
               {getSections().map((section) => {
                 const count = sectionCounts[section] || 0;
                 const isActive = selectedSections.has(section);
@@ -288,14 +284,13 @@ export function BibliographyView() {
             </div>
           </div>
 
-          {/* Results - Compact List with Sticky Section Headers */}
+          {/* R\u00e9sultats */}
           {searchResults.length > 0 ? (
             <div className="bg-karmine-surface/90 backdrop-blur-sm rounded-sm border border-blue-200/20 overflow-hidden">
               {(() => {
                 let globalIndex = 0;
                 return Array.from(groupedResults.entries()).map(([section, items]) => (
                   <div key={section}>
-                    {/* Section Header - Sticky */}
                     <div className="sticky top-0 z-10 bg-karmine-surface px-4 py-2 border-b border-gray-800">
                       <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-blue-400 text-xs uppercase tracking-wide">
@@ -307,7 +302,6 @@ export function BibliographyView() {
                       </div>
                     </div>
 
-                    {/* Section Items - Compact List */}
                     <div>
                       {items.map(({ source, matchIndices, matchType }) => {
                         const titleIndices = matchIndices.get(source.title) || [];
@@ -329,17 +323,13 @@ export function BibliographyView() {
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex-1 min-w-0">
-                                {/* Title */}
                                 <div className="flex items-start gap-2 mb-1">
                                   <h4 className="text-white text-sm flex-1">
                                     {filter && titleIndices.length > 0
                                       ? highlightMatches(source.title, titleIndices, matchType)
                                       : source.title}
                                   </h4>
-                                  {/* Match type badge */}
-                                  {filter && <MatchTypeBadge type={matchType} compact />}
                                 </div>
-                                {/* Author, year, subsection */}
                                 <div className="flex items-center flex-wrap gap-1.5 text-xs text-gray-500">
                                   <span>
                                     {filter && authorIndices.length > 0
@@ -356,7 +346,6 @@ export function BibliographyView() {
                                   )}
                                 </div>
                               </div>
-                              {/* Open button */}
                               <button
                                 onClick={() => openUrl(source.url)}
                                 className="flex-shrink-0 flex items-center gap-1 px-2 py-1 bg-blue-500/10 text-blue-400 rounded hover:bg-blue-500 hover:text-white transition-colors text-xs"
@@ -400,7 +389,6 @@ export function BibliographyView() {
             </div>
           )}
 
-      {/* Inline styles for scrollbar-hide */}
       <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;

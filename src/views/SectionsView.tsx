@@ -22,11 +22,12 @@ export function SectionsView({ sections, onImageClick }: SectionsViewProps) {
 
           {/* Images Grid */}
           <div className="px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {section.images.map((img) => (
+            {section.images.map((img, index) => (
               <ImageCard
                 key={img.id}
                 img={img}
                 onClick={(clickedImg) => onImageClick(clickedImg, section.images)}
+                loading={index < 3 ? 'eager' : 'lazy'}  // Prioritize first 3 images for LCP
               />
             ))}
           </div>

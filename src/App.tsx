@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { ViewType, ReportImage } from './types';
 import { reportConfig } from './config/reportConfig';
 import { Loader } from './components/Loader';
@@ -6,10 +6,23 @@ import { Lightbox } from './components/Lightbox';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileHeader } from './components/layout/MobileHeader';
 import { TopBar } from './components/layout/TopBar';
-import { SectionsView } from './views/SectionsView';
-import { GalleryView } from './views/GalleryView';
-import { BibliographyView } from './views/BibliographyView';
-import { LexiqueView } from './views/LexiqueView';
+import { SectionsView } from './views/SectionsView';  // Keep eager (initial view)
+
+// Lazy load other views for code splitting and better TTI
+const GalleryView = lazy(() => import('./views/GalleryView'));
+const BibliographyView = lazy(() => import('./views/BibliographyView'));
+const LexiqueView = lazy(() => import('./views/LexiqueView'));
+
+// Loading fallback for lazy-loaded views
+function ViewLoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-blue-400 font-mono animate-pulse">
+        LOADING VIEW...
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -47,15 +60,27 @@ export default function App() {
     setIsSidebarOpen((prev) => !prev);
   }, []);
 
-  // Render the appropriate view
+  // Render the appropriate view with lazy loading support
   const renderView = () => {
     switch (currentView) {
       case 'gallery':
-        return <GalleryView sections={reportConfig.sections} onImageClick={handleImageClick} />;
+        return (
+          <Suspense fallback={<ViewLoadingFallback />}>
+            <GalleryView sections={reportConfig.sections} onImageClick={handleImageClick} />
+          </Suspense>
+        );
       case 'biblio':
-        return <BibliographyView />;
+        return (
+          <Suspense fallback={<ViewLoadingFallback />}>
+            <BibliographyView />
+          </Suspense>
+        );
       case 'lexique':
-        return <LexiqueView />;
+        return (
+          <Suspense fallback={<ViewLoadingFallback />}>
+            <LexiqueView />
+          </Suspense>
+        );
       default:
         return <SectionsView sections={reportConfig.sections} onImageClick={handleImageClick} />;
     }

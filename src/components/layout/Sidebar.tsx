@@ -122,7 +122,7 @@ export function Sidebar({
 
           <div className="flex items-center space-x-3 bg-karmine-surface p-3 rounded-lg border border-blue-900/20">
             <img
-              src="imgs/kaiki.jpg"
+              src="imgs/kaiki_webp.webp"
               alt="Profile"
               className="w-8 h-8 rounded object-cover"
             />

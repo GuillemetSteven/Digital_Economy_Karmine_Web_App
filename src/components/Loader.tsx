@@ -7,27 +7,30 @@ interface LoaderProps {
 
 type LoaderPhase = 'filling' | 'sprint' | 'tvOff' | 'done';
 
-// Timing constants (in ms) - 4s total
-const FILL_DURATION = 2500;     // Letters fill up
-const SUBTITLE_DELAY = 800;     // Subtitle appears
-const SPRINT_DELAY = 2500;      // Progress bar sprint starts
-const SPRINT_DURATION = 600;    // Sprint 0% -> 100%
-const TV_OFF_DELAY = 3100;      // TV effect starts
-const TV_OFF_DURATION = 550;    // TV effect duration (faster)
-const TOTAL_DURATION = 4000;    // Total loader duration
+// Timing constants (in ms) - synchronized with light sweep
+// Light sweep: G→D (0-1s), D→G (1-2s) - ONE cycle only, 100% exactly when D→G ends
+const FILL_DURATION = 1400;     // Letters fill up
+const SUBTITLE_DELAY = 400;     // Subtitle appears
+const SPRINT_DELAY = 1500;      // Progress bar sprint starts
+const SPRINT_DURATION = 500;    // Sprint 0% -> 100% (ends exactly at 2000ms = D→G end)
+const TV_OFF_DELAY = 2150;      // TV effect starts (150ms after 100% to see it)
+const TV_OFF_DURATION = 400;    // TV effect duration
+const TOTAL_DURATION = 2600;    // Total loader duration
+const LIGHT_SWEEP_DURATION = 2; // ONE cycle: G→D (0-1s) + D→G (1-2s), ends at 2s
 
 export function Loader({ onComplete }: LoaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [showContent, setShowContent] = useState(false);
   const [phase, setPhase] = useState<LoaderPhase>('filling');
   const [showSubtitle, setShowSubtitle] = useState(false);
+  const [percentage, setPercentage] = useState(0);
 
   const title = theme.branding.title;
   const letters = title.split('');
 
-  // Generate random particles positions
+  // Generate random particles positions (reduced from 30 to 15 for better performance)
   const particles = useMemo(() =>
-    Array.from({ length: 30 }, (_, i) => ({
+    Array.from({ length: 15 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 2,
@@ -65,6 +68,24 @@ export function Loader({ onComplete }: LoaderProps) {
     };
   }, [onComplete]);
 
+  // Animate percentage counter during sprint phase
+  useEffect(() => {
+    if (phase !== 'sprint') return;
+
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(100, Math.round((elapsed / SPRINT_DURATION) * 100));
+      setPercentage(progress);
+
+      if (progress >= 100) {
+        clearInterval(interval);
+      }
+    }, 16); // ~60fps
+
+    return () => clearInterval(interval);
+  }, [phase]);
+
   // Hide scrollbar during loading
   useEffect(() => {
     const html = document.documentElement;
@@ -95,12 +116,11 @@ export function Loader({ onComplete }: LoaderProps) {
         isTvOff ? 'tv-off-effect' : ''
       }`}
     >
-      {/* TV CRT overlay for shutdown effect */}
       {isTvOff && (
         <div className="absolute inset-0 z-50 pointer-events-none tv-crt-overlay" />
       )}
 
-      {/* Animated background grid */}
+      {/* Grille de fond */}
       <div className="absolute inset-0 opacity-20">
         <div
           className="absolute inset-0"
@@ -115,7 +135,7 @@ export function Loader({ onComplete }: LoaderProps) {
         />
       </div>
 
-      {/* Floating particles */}
+      {/* Particules */}
       <div className="absolute inset-0 overflow-hidden">
         {particles.map((particle) => (
           <div
@@ -134,7 +154,6 @@ export function Loader({ onComplete }: LoaderProps) {
         ))}
       </div>
 
-      {/* Scan line effect */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -142,16 +161,14 @@ export function Loader({ onComplete }: LoaderProps) {
         }}
       />
 
-      {/* Horizontal light sweep */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.1) 50%, transparent 100%)',
-          animation: 'lightSweep 3s ease-in-out infinite',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.15) 50%, transparent 100%)',
+          animation: `lightSweep ${LIGHT_SWEEP_DURATION}s ease-in-out forwards`,
         }}
       />
 
-      {/* Main glow effect behind text */}
       <div
         className={`absolute w-96 h-96 rounded-full blur-[120px] transition-all duration-1000 ${
           showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
@@ -162,7 +179,7 @@ export function Loader({ onComplete }: LoaderProps) {
         }}
       />
 
-      {/* Logo with fill effect */}
+      {/* Logo */}
       <div className={`relative transition-all duration-500 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <h1 className="text-5xl sm:text-6xl md:text-8xl font-black italic tracking-tighter flex relative z-10">
           {letters.map((letter, index) => (
@@ -178,7 +195,6 @@ export function Loader({ onComplete }: LoaderProps) {
           ))}
         </h1>
 
-        {/* Glitch layers */}
         <h1
           className="absolute top-0 left-0 text-5xl sm:text-6xl md:text-8xl font-black italic tracking-tighter text-blue-500/20 flex z-0"
           style={{ animation: 'glitchLeft 2.5s ease-in-out infinite' }}
@@ -203,7 +219,7 @@ export function Loader({ onComplete }: LoaderProps) {
         </h1>
       </div>
 
-      {/* Subtitle with animated underline */}
+      {/* Sous-titre */}
       <div
         className={`mt-6 relative transition-all duration-700 ${
           showSubtitle ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
@@ -215,14 +231,13 @@ export function Loader({ onComplete }: LoaderProps) {
         <div className="absolute -bottom-3 left-1/2 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent loader-underline" />
       </div>
 
-      {/* Loading bar with glitch effect */}
+      {/* Barre de progression */}
       <div
         className={`absolute bottom-[15%] sm:bottom-[12%] left-1/2 -translate-x-1/2 w-48 sm:w-64 transition-all duration-500 delay-300 ${
           showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}
       >
         <div className="relative h-[3px] bg-blue-900/30 rounded-full overflow-hidden backdrop-blur-sm">
-          {/* Progress bar - stays at 0 during filling, then sprints to 100% */}
           <div
             className={`absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 rounded-full ${
               phase === 'sprint' || phase === 'tvOff' ? 'progress-sprint' : 'progress-glitch'
@@ -231,7 +246,6 @@ export function Loader({ onComplete }: LoaderProps) {
               backgroundSize: '200% 100%',
             }}
           />
-          {/* Glow on loading bar */}
           <div
             className={`absolute inset-y-0 left-0 bg-blue-400 rounded-full blur-sm ${
               phase === 'sprint' || phase === 'tvOff' ? 'progress-sprint' : 'progress-glitch'
@@ -239,24 +253,23 @@ export function Loader({ onComplete }: LoaderProps) {
             style={{ opacity: 0.5 }}
           />
         </div>
-        {/* Loading percentage with glitch */}
         <div className="flex justify-between mt-2 text-[10px] sm:text-xs text-blue-500/60 font-mono">
           <span className={phase === 'filling' ? 'text-glitch' : ''}>
-            {phase === 'filling' ? 'INITIALIZING' : 'LOADING'}
+            {phase === 'filling' ? 'INITIALIZING' : phase === 'tvOff' ? 'COMPLETE' : 'LOADING'}
           </span>
-          <span className={`percentage-display ${phase === 'filling' ? 'percentage-glitch' : phase === 'sprint' || phase === 'tvOff' ? 'percentage-sprint' : ''}`}>
-            {phase === 'tvOff' ? '100%' : '0%'}
+          <span className={`percentage-display ${phase === 'filling' ? 'percentage-glitch' : ''} ${percentage === 100 ? 'text-blue-400' : ''}`}>
+            {phase === 'filling' ? '0%' : `${percentage}%`}
           </span>
         </div>
       </div>
 
-      {/* Corner decorations */}
+      {/* D\u00e9corations coins */}
       <div className="absolute top-6 left-6 w-12 h-12 border-l-2 border-t-2 border-blue-500/30" />
       <div className="absolute top-6 right-6 w-12 h-12 border-r-2 border-t-2 border-blue-500/30" />
       <div className="absolute bottom-6 left-6 w-12 h-12 border-l-2 border-b-2 border-blue-500/30" />
       <div className="absolute bottom-6 right-6 w-12 h-12 border-r-2 border-b-2 border-blue-500/30" />
 
-      {/* Inline CSS for animations */}
+      {/* Animations CSS */}
       <style>{`
         /* Letter blur reveal effect - starts blurry, becomes sharp */
         .letter-fill {
@@ -322,41 +335,10 @@ export function Loader({ onComplete }: LoaderProps) {
           animation: percentageGlitch 0.3s steps(1) infinite;
         }
 
-        .percentage-sprint {
-          animation: percentageSprint ${SPRINT_DURATION}ms steps(20) forwards;
-        }
-
         @keyframes percentageGlitch {
-          0% { content: "0%"; opacity: 1; }
-          20% { content: "##"; opacity: 0.8; transform: translateX(2px); }
-          40% { content: "0%"; opacity: 1; }
-          60% { content: "??"; opacity: 0.7; transform: translateX(-1px); }
-          80% { content: "0%"; opacity: 1; }
-          100% { content: "0%"; opacity: 0.9; }
-        }
-
-        @keyframes percentageSprint {
-          0% { }
-          5% { }
-          10% { }
-          15% { }
-          20% { }
-          25% { }
-          30% { }
-          35% { }
-          40% { }
-          45% { }
-          50% { }
-          55% { }
-          60% { }
-          65% { }
-          70% { }
-          75% { }
-          80% { }
-          85% { }
-          90% { }
-          95% { }
-          100% { }
+          0%, 40%, 80%, 100% { opacity: 1; transform: translateX(0); }
+          20% { opacity: 0.8; transform: translateX(2px); }
+          60% { opacity: 0.7; transform: translateX(-1px); }
         }
 
         /* Text glitch effect */
@@ -442,10 +424,11 @@ export function Loader({ onComplete }: LoaderProps) {
           100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
         }
 
-        /* Light sweep animation */
+        /* Light sweep animation - faster cycle to complete before TV effect */
         @keyframes lightSweep {
-          0%, 100% { transform: translateX(-100%); }
+          0% { transform: translateX(-100%); }
           50% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
         }
 
         /* Glow pulse animation */

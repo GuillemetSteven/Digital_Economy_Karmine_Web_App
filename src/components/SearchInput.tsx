@@ -38,7 +38,7 @@ export function SearchInput({
   onKeyDown,
   autocompleteOverlay,
 }: SearchInputProps) {
-  // Detect Mac vs Windows
+  // D\u00e9tection Mac vs Windows
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
   // État pour suivre quelles touches sont enfoncées

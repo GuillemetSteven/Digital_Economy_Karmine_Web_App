@@ -8,21 +8,23 @@ interface ImageCardProps {
   onClick: (img: ReportImage, imagesContext?: ReportImage[]) => void;
   showSectionTitle?: boolean;
   sectionTitle?: string;
+  loading?: 'lazy' | 'eager';  // Performance optimization: control image loading strategy
 }
 
-export function ImageCard({ img, onClick, showSectionTitle, sectionTitle }: ImageCardProps) {
+export function ImageCard({ img, onClick, showSectionTitle, sectionTitle, loading = 'lazy' }: ImageCardProps) {
   return (
     <div
       onClick={() => onClick(img)}
       className="group cursor-pointer bg-karmine-surface rounded-xl overflow-hidden border border-blue-900/30 hover:border-blue-400/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/10 flex flex-col h-full"
     >
-      {/* Zone Image (Placeholder si pas de src) */}
       <div className="aspect-[21/9] relative overflow-hidden bg-black/20">
         {img.src ? (
           <>
             <img
               src={img.mediaType === 'video' && img.videoThumbnail ? img.videoThumbnail : img.src}
               alt={img.title}
+              loading={loading}
+              decoding="async"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             {img.mediaType === 'video' && (
@@ -37,14 +39,12 @@ export function ImageCard({ img, onClick, showSectionTitle, sectionTitle }: Imag
           <PlaceholderImage title={img.title} />
         )}
 
-        {/* Badge numéro de page - coin supérieur droit, toujours visible */}
         {img.pageNumber && (
           <div className="absolute top-3 right-3 z-10">
             <Badge pageNumber={img.pageNumber} />
           </div>
         )}
 
-        {/* Overlay au survol */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
           <div className="flex items-center space-x-2 text-white bg-blue-600 px-4 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform">
             <Maximize2 size={16} />
@@ -53,7 +53,6 @@ export function ImageCard({ img, onClick, showSectionTitle, sectionTitle }: Imag
         </div>
       </div>
 
-      {/* Info Card */}
       <div className="p-4 flex flex-col flex-grow">
         {showSectionTitle && sectionTitle && (
           <p className="text-xs text-blue-400 uppercase tracking-wider font-bold mb-1">{sectionTitle}</p>
