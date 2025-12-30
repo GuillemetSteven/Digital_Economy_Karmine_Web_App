@@ -4,4 +4,4 @@ Application web pour une meilleure lecture de mon rapport en amont :)
 
 ## Last Update
 
-**Date :** 2025-12-26
+**Date :** 2025-12-29
